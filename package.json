@@ -1,0 +1,13 @@
+{
+  "name": "homeo-monorepo",
+  "private": true,
+  "workspaces": ["apps/backend", "packages/*"],
+  "scripts": {
+    "dev:backend": "npm run dev --workspace=apps/backend",
+    "build:backend": "npm run build --workspace=apps/backend",
+    "test:backend": "npm run test --workspace=apps/backend"
+  },
+  "devDependencies": {
+    "turbo": "latest"
+  }
+}
