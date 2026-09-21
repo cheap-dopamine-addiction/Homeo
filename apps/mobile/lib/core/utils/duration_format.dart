@@ -16,8 +16,9 @@ String formatFocusDuration(AppLocalizations l10n, Duration duration) {
   final totalMinutes = duration.inMinutes;
   final hours = totalMinutes ~/ 60;
   final minutes = totalMinutes % 60;
-  if (hours > 0 && minutes > 0)
+  if (hours > 0 && minutes > 0) {
     return l10n.durationHoursMinutes(hours, minutes);
+  }
   if (hours > 0) return l10n.durationHoursOnly(hours);
   return l10n.durationMinutesOnly(minutes);
 }

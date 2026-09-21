@@ -88,8 +88,9 @@ class FocusSessionController extends _$FocusSessionController {
   /// the pause-limit sheet.
   PauseOutcome pause() {
     final current = state;
-    if (current is! FocusRunning || current.isPaused)
+    if (current is! FocusRunning || current.isPaused) {
       return PauseOutcome.ignored;
+    }
     if (!current.canPause) return PauseOutcome.limitReached;
 
     final now = _clock.now();

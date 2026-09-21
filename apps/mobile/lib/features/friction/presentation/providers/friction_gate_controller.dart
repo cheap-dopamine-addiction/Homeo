@@ -238,8 +238,9 @@ class FrictionGateController extends _$FrictionGateController {
         .requestOverride(appPackageId: request.appPackageId, reason: trimmed)
         .listen((decision) {
           final current = state;
-          if (current == null || current.partner != PartnerStage.pending)
+          if (current == null || current.partner != PartnerStage.pending) {
             return;
+          }
           switch (decision) {
             case PartnerDecision.approved:
               _fire(_release(ResolvedAction.partnerApproved, reason: trimmed));

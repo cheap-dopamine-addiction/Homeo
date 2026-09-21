@@ -158,11 +158,7 @@ void _patchManifest(String path) {
     }
     final at = _lineStart(s, close);
     s =
-        s.substring(0, at) +
-        '        <receiver$nl'
-            '            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"$nl'
-            '            android:exported="false" />$nl' +
-        s.substring(at);
+        '${s.substring(0, at)}        <receiver$nl            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"$nl            android:exported="false" />$nl${s.substring(at)}';
     done.add('notification receiver');
   }
 
@@ -200,9 +196,7 @@ void _patchGradle(String path, {required bool kotlin}) {
     final compileOptions = RegExp(r'compileOptions\s*\{').firstMatch(s);
     if (compileOptions != null) {
       s =
-          s.substring(0, compileOptions.end) +
-          '$nl        $flag' +
-          s.substring(compileOptions.end);
+          '${s.substring(0, compileOptions.end)}$nl        $flag${s.substring(compileOptions.end)}';
       done.add('desugaring flag');
     } else {
       final androidBlock = RegExp(r'\bandroid\s*\{').firstMatch(s);
@@ -211,9 +205,7 @@ void _patchGradle(String path, {required bool kotlin}) {
         return;
       }
       s =
-          s.substring(0, androidBlock.end) +
-          '$nl    compileOptions {$nl        $flag$nl    }' +
-          s.substring(androidBlock.end);
+          '${s.substring(0, androidBlock.end)}$nl    compileOptions {$nl        $flag$nl    }${s.substring(androidBlock.end)}';
       done.add('desugaring flag (new compileOptions)');
     }
   }
@@ -237,9 +229,7 @@ void _patchGradle(String path, {required bool kotlin}) {
     }
     if (newValue != null) {
       s =
-          s.substring(0, minMatch.start) +
-          '${minMatch.group(1)}$newValue${minMatch.group(3)}' +
-          s.substring(minMatch.end);
+          '${s.substring(0, minMatch.start)}${minMatch.group(1)}$newValue${minMatch.group(3)}${s.substring(minMatch.end)}';
       done.add('minSdk >= 23');
     }
   }
@@ -253,7 +243,7 @@ void _patchGradle(String path, {required bool kotlin}) {
         : "coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'";
     final block = RegExp(r'^dependencies\s*\{', multiLine: true).firstMatch(s);
     if (block != null) {
-      s = s.substring(0, block.end) + '$nl    $dep' + s.substring(block.end);
+      s = '${s.substring(0, block.end)}$nl    $dep${s.substring(block.end)}';
     } else {
       s = '${s.trimRight()}$nl${nl}dependencies {$nl    $dep$nl}$nl';
     }
@@ -313,9 +303,7 @@ void _patchAppDelegate(String path) {
     if (imports.isNotEmpty) {
       final last = imports.last;
       s =
-          s.substring(0, last.end) +
-          '${nl}import UserNotifications' +
-          s.substring(last.end);
+          '${s.substring(0, last.end)}${nl}import UserNotifications${s.substring(last.end)}';
     }
   }
 
