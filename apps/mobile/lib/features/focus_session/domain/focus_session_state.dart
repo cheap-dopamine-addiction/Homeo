@@ -1,38 +1,15 @@
 import 'package:homeo/features/focus_session/domain/focus_session.dart';
-import 'package:homeo/features/focus_session/domain/session_reflection.dart';
+import 'package:homeo/features/focus_session/domain/focus_rules.dart';
 
-// ---------------------------------------------------------------------------
-// Phase enum  (used in focus_screen.dart to switch child views)
-// ---------------------------------------------------------------------------
+enum FocusPhase { idle, setup, running, summary }
 
-/// Which sub-view the Focus screen should display.
-enum FocusPhase {
-  /// Landing page — no session active.
-  idle,
-
-  /// Duration / task setup before starting the timer.
-  setup,
-
-  /// Timer is running (or paused).
-  active,
-
-  /// End-of-session summary & reflection.
-  summary,
-}
-
-// ---------------------------------------------------------------------------
-// Sealed state hierarchy
-// ---------------------------------------------------------------------------
-
-/// Base class for all states the [FocusSessionController] can emit.
+/// What the Focus tab is doing right now.
 sealed class FocusSessionState {
   const FocusSessionState();
 
-  /// Which [FocusPhase] this state corresponds to.
   FocusPhase get phase;
 }
 
-/// No session is currently active.
 final class FocusIdle extends FocusSessionState {
   const FocusIdle();
 
@@ -40,68 +17,66 @@ final class FocusIdle extends FocusSessionState {
   FocusPhase get phase => FocusPhase.idle;
 }
 
-/// The user is configuring a new session (duration, task label).
 final class FocusSetup extends FocusSessionState {
-  const FocusSetup({this.plannedMinutes = 25, this.taskLabel});
-
-  final int plannedMinutes;
-  final String? taskLabel;
+  const FocusSetup();
 
   @override
   FocusPhase get phase => FocusPhase.setup;
-
-  FocusSetup copyWith({int? plannedMinutes, String? taskLabel}) => FocusSetup(
-        plannedMinutes: plannedMinutes ?? this.plannedMinutes,
-        taskLabel: taskLabel ?? this.taskLabel,
-      );
 }
 
-/// The timer is running (or paused).
+/// A session is active (running or paused).
+///
+/// [now] is the last time the controller ticked; countdown getters derive from
+/// it. While paused nothing ticks and [FocusSession.elapsedAt] is frozen.
 final class FocusRunning extends FocusSessionState {
   const FocusRunning({
     required this.session,
-    required this.elapsedSeconds,
-    this.isPaused = false,
+    required this.now,
+    required this.pausesUsedBefore,
   });
 
   final FocusSession session;
-  final int elapsedSeconds;
-  final bool isPaused;
+  final DateTime now;
+
+  /// Pauses spent by *other* sessions earlier today.
+  final int pausesUsedBefore;
 
   @override
-  FocusPhase get phase => FocusPhase.active;
+  FocusPhase get phase => FocusPhase.running;
 
-  Duration get elapsed => Duration(seconds: elapsedSeconds);
-  Duration get planned => session.planned;
-  Duration get remaining => (planned - elapsed).isNegative
-      ? Duration.zero
-      : planned - elapsed;
+  bool get isPaused => session.isPaused;
+  Duration get remaining => session.remainingAt(now);
 
-  double get progress => (elapsedSeconds / session.plannedMinutes / 60)
-      .clamp(0.0, 1.0);
+  /// Whole seconds, rounded up, so the display never shows 00:00 early.
+  int get remainingSeconds => (remaining.inMilliseconds / 1000).ceil();
 
-  FocusRunning copyWith({
-    FocusSession? session,
-    int? elapsedSeconds,
-    bool? isPaused,
-  }) =>
-      FocusRunning(
-        session: session ?? this.session,
-        elapsedSeconds: elapsedSeconds ?? this.elapsedSeconds,
-        isPaused: isPaused ?? this.isPaused,
-      );
+  /// 1.0 at the start, 0.0 at the end.
+  double get progress {
+    final total = session.plannedDuration.inMilliseconds;
+    if (total <= 0) return 0;
+    return (remaining.inMilliseconds / total).clamp(0.0, 1.0);
+  }
+
+  int get pausesUsedToday => pausesUsedBefore + session.pauseCount;
+  bool get canPause => pausesUsedToday < FocusRules.maxPausesPerDay;
+
+  FocusRunning copyWith({FocusSession? session, DateTime? now}) {
+    return FocusRunning(
+      session: session ?? this.session,
+      now: now ?? this.now,
+      pausesUsedBefore: pausesUsedBefore,
+    );
+  }
 }
 
-/// Session has ended — showing the summary / reflection UI.
+/// The just-finished session, waiting for the optional reflection.
 final class FocusSummary extends FocusSessionState {
-  const FocusSummary({
-    required this.session,
-    this.reflections = const [],
-  });
+  const FocusSummary({required this.session});
 
   final FocusSession session;
-  final List<ReflectionEntry> reflections;
 
   @override
   FocusPhase get phase => FocusPhase.summary;
+
+  bool get completed => session.status == FocusSessionStatus.completed;
 }

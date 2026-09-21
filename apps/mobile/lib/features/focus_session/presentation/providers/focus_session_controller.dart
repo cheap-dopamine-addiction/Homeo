@@ -1,232 +1,238 @@
 import 'dart:async';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:homeo/core/time/clock.dart';
 import 'package:homeo/features/focus_session/data/focus_session_repository.dart';
+import 'package:homeo/features/focus_session/data/session_alarm.dart';
 import 'package:homeo/features/focus_session/domain/focus_rules.dart';
 import 'package:homeo/features/focus_session/domain/focus_session.dart';
 import 'package:homeo/features/focus_session/domain/focus_session_state.dart';
 import 'package:homeo/features/focus_session/domain/session_reflection.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 
 part 'focus_session_controller.g.dart';
 
-// ---------------------------------------------------------------------------
-// Controller
-// ---------------------------------------------------------------------------
+enum PauseOutcome { paused, limitReached, ignored }
 
-// FIX 1: The original file declared the class without the correct Riverpod
-// code-gen annotation, so `state`, `ref`, and `build` were all undefined.
-// The class must extend `Notifier<FocusSessionState>` (from riverpod_annotation)
-// and be annotated with @riverpod so the generator creates the provider.
-
-@riverpod
+/// Owns the whole session lifecycle: setup → running/paused → summary → idle.
+///
+/// * keepAlive: switching tabs must never stop the timer.
+/// * The countdown is *derived* from timestamps (see [FocusSession]); the
+///   ticker only decides when to re-render.
+/// * State changes happen synchronously before any `await`, so double taps
+///   cannot start/finish a session twice.
+@Riverpod(keepAlive: true)
 class FocusSessionController extends _$FocusSessionController {
   static const _uuid = Uuid();
-  Timer? _ticker;
+  static const _tickInterval = Duration(milliseconds: 250);
 
-  // FIX 2: `build()` is the correct override — NOT a method named `build`
-  // with @override on a non-overriding member.  The generator expects this
-  // exact signature.
+  Timer? _ticker;
+  bool _starting = false;
+
+  FocusSessionRepository get _repo => ref.read(focusSessionRepositoryProvider);
+  Clock get _clock => ref.read(clockProvider);
+  SessionAlarm get _alarm => ref.read(sessionAlarmProvider);
+
   @override
   FocusSessionState build() {
-    // Clean up the ticker if the provider is disposed.
-    ref.onDispose(_stopTimer);
+    ref.onDispose(_stopTicker);
+    unawaited(_restoreActiveSession());
     return const FocusIdle();
   }
 
-  // ---------- User actions ----------
+  // ── Setup ────────────────────────────────────────────────────────────────
 
-  /// Move from [FocusIdle] → [FocusSetup].
-  void startSetup() {
-    if (state is! FocusIdle) return;
-    state = const FocusSetup();
+  void openSetup() {
+    if (state is FocusIdle) state = const FocusSetup();
   }
 
-  /// Update configuration while in [FocusSetup].
-  void updateSetup({int? plannedMinutes, String? taskLabel}) {
-    if (state is! FocusSetup) return;
-    final setup = state as FocusSetup;
-    state = setup.copyWith(
-      plannedMinutes: plannedMinutes,
-      taskLabel: taskLabel,
-    );
+  void closeSetup() {
+    if (state is FocusSetup) state = const FocusIdle();
   }
 
-  /// Cancel setup and go back to [FocusIdle].
-  void cancelSetup() {
-    if (state is! FocusSetup) return;
-    // FIX 3: call FocusIdle() as a plain CONSTRUCTOR, not this.FocusIdle()
-    state = const FocusIdle();
-  }
+  Future<void> start({
+    required Duration duration,
+    required String intention,
+  }) async {
+    if (_starting || state is! FocusSetup) return;
+    if (duration < FocusRules.minDuration) return;
 
-  /// [FocusSetup] → [FocusRunning]: create the session and start the timer.
-  Future<void> beginSession() async {
-    if (state is! FocusSetup) return;
-    final setup = state as FocusSetup;
+    _starting = true;
+    try {
+      final now = _clock.now();
+      final pausesBefore = await _repo.pausesUsedOn(now);
+      final session = FocusSession(
+        id: _uuid.v4(),
+        intention: intention.trim(),
+        plannedDuration: duration,
+        startedAt: now,
+      );
+      await _repo.upsert(session); // durable before the UI says "running"
+      if (!ref.mounted) return;
 
-    if (!FocusRules.isValidDuration(setup.plannedMinutes)) return;
-
-    final clock = ref.read(clockProvider);
-    final repo = ref.read(focusSessionRepositoryProvider);
-
-    // FIX 4: `FocusSession(...)` is a domain constructor call — not a method
-    // on this class.  The original error was caused by writing `FocusSession(`
-    // inside the class body where Dart resolved it as a method call.
-    final session = FocusSession(
-      id: _uuid.v4(),
-      plannedMinutes: setup.plannedMinutes,
-      taskLabel: setup.taskLabel,
-      startedAt: clock.now(),
-      status: FocusSessionStatus.running,
-    );
-
-    await repo.upsert(session);
-
-    // FIX 5: `FocusRunning(...)` is a state constructor, not a method.
-    state = FocusRunning(session: session, elapsedSeconds: 0);
-    _startTimer();
-  }
-
-  /// Pause / resume the running timer.
-  void togglePause() {
-    if (state is! FocusRunning) return;
-    final running = state as FocusRunning;
-    if (running.isPaused) {
-      _startTimer();
-    } else {
-      _stopTimer();
+      state = FocusRunning(
+        session: session,
+        now: now,
+        pausesUsedBefore: pausesBefore,
+      );
+      _startTicker();
+      _scheduleAlarm(session);
+    } finally {
+      _starting = false;
     }
-    state = running.copyWith(isPaused: !running.isPaused);
   }
 
-  /// User explicitly ends the session before the timer completes.
-  Future<void> endSessionEarly({
-    ExitReason reason = ExitReason.userEnded,
-  }) async {
-    if (state is! FocusRunning) return;
-    _stopTimer();
-    final running = state as FocusRunning;
-    final clock = ref.read(clockProvider);
+  // ── Running ──────────────────────────────────────────────────────────────
 
-    final isCompleted = FocusRules.isCompleted(
-      elapsedSeconds: running.elapsedSeconds,
-      plannedSeconds: running.session.plannedMinutes * 60,
-    );
+  /// Synchronous on purpose: the caller needs the outcome immediately to show
+  /// the pause-limit sheet.
+  PauseOutcome pause() {
+    final current = state;
+    if (current is! FocusRunning || current.isPaused)
+      return PauseOutcome.ignored;
+    if (!current.canPause) return PauseOutcome.limitReached;
 
-    final updatedSession = running.session.copyWith(
-      elapsedSeconds: running.elapsedSeconds,
-      endedAt: clock.now(),
-      status: isCompleted
-          ? FocusSessionStatus.completed
-          : FocusSessionStatus.abandoned,
-      exitReason: isCompleted ? null : reason,
-    );
-
-    final repo = ref.read(focusSessionRepositoryProvider);
-    await repo.upsert(updatedSession);
-
-    // FIX 6: FocusSummary(...) is a state constructor.
-    state = FocusSummary(session: updatedSession);
+    final now = _clock.now();
+    final paused = current.session.paused(now);
+    _stopTicker();
+    state = current.copyWith(session: paused, now: now);
+    unawaited(_alarm.cancel());
+    unawaited(_repo.upsert(paused));
+    return PauseOutcome.paused;
   }
 
-  /// Submit a reflection answer for the current summary.
-  Future<void> submitReflection({
-    required String promptKey,
-    required String answer,
-  }) async {
-    if (state is! FocusSummary) return;
-    final summary = state as FocusSummary;
+  void resume() {
+    final current = state;
+    if (current is! FocusRunning || !current.isPaused) return;
 
-    final entry = ReflectionEntry(
-      id: _uuid.v4(),
-      sessionId: summary.session.id,
-      promptKey: promptKey,
-      answer: answer,
-      createdAt: DateTime.now(),
-    );
-
-    final repo = ref.read(focusSessionRepositoryProvider);
-    await repo.addReflection(entry);
-
-    state = FocusSummary(
-      session: summary.session,
-      reflections: [...summary.reflections, entry],
-    );
+    final now = _clock.now();
+    final resumed = current.session.resumed(now);
+    state = current.copyWith(session: resumed, now: now);
+    _startTicker();
+    _scheduleAlarm(resumed);
+    unawaited(_repo.upsert(resumed));
   }
 
-  /// Dismiss the summary and return to [FocusIdle].
-  void dismissSummary() {
-    if (state is! FocusSummary) return;
+  /// Called after the exit gate is confirmed.
+  Future<void> abort({ExitReason? reason}) {
+    return _finish(completed: false, exitReason: reason);
+  }
+
+  // ── Summary ──────────────────────────────────────────────────────────────
+
+  Future<void> completeSummary({SessionMood? mood}) async {
+    final current = state;
+    if (current is! FocusSummary) return;
+
     state = const FocusIdle();
+    if (mood != null) {
+      await _repo.saveReflection(
+        sessionId: current.session.id,
+        promptKey: ReflectionPromptKeys.sessionMood,
+        moodTag: mood.name,
+      );
+    }
   }
 
-  /// Reset to [FocusIdle] from any state (e.g. on auth sign-out).
-  void reset() {
-    _stopTimer();
-    state = const FocusIdle();
-  }
+  // ── Internals ────────────────────────────────────────────────────────────
 
-  // ---------- Timer internals ----------
-
-  void _startTimer() {
+  void _startTicker() {
     _ticker?.cancel();
-    _ticker = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
+    _ticker = Timer.periodic(_tickInterval, (_) => _onTick());
   }
 
-  void _stopTimer() {
+  void _stopTicker() {
     _ticker?.cancel();
     _ticker = null;
   }
 
-  void _tick() {
-    if (state is! FocusRunning) {
-      _stopTimer();
-      return;
-    }
-    final running = state as FocusRunning;
-    if (running.isPaused) return;
-
-    final newElapsed = running.elapsedSeconds + 1;
-    final plannedSeconds = running.session.plannedMinutes * 60;
-
-    if (newElapsed >= plannedSeconds) {
-      // Timer complete — auto-finish.
-      _stopTimer();
-      _onTimerComplete(running, newElapsed);
+  void _onTick() {
+    final current = state;
+    if (current is! FocusRunning || current.isPaused) {
+      _stopTicker();
       return;
     }
 
-    state = running.copyWith(elapsedSeconds: newElapsed);
+    final now = _clock.now();
+    if (current.session.remainingAt(now) <= Duration.zero) {
+      unawaited(_finish(completed: true));
+      return;
+    }
+
+    // Only re-render when the visible second changes (4 ticks/s → 1 rebuild/s).
+    final next = current.copyWith(now: now);
+    if (next.remainingSeconds != current.remainingSeconds) state = next;
   }
 
-  Future<void> _onTimerComplete(FocusRunning running, int elapsed) async {
-    final clock = ref.read(clockProvider);
-    final repo = ref.read(focusSessionRepositoryProvider);
+  Future<void> _finish({
+    required bool completed,
+    ExitReason? exitReason,
+  }) async {
+    final current = state;
+    if (current is! FocusRunning) return;
 
-    final completed = running.session.copyWith(
-      elapsedSeconds: elapsed,
-      endedAt: clock.now(),
-      status: FocusSessionStatus.completed,
+    _stopTicker();
+    unawaited(_alarm.cancel());
+    final finished = current.session.finished(
+      now: _clock.now(),
+      completed: completed,
+    );
+    state = FocusSummary(session: finished); // sync → later calls are no-ops
+
+    await _repo.upsert(finished);
+    if (exitReason != null) {
+      await _repo.saveReflection(
+        sessionId: finished.id,
+        promptKey: ReflectionPromptKeys.exitReason,
+        responseText: exitReason.name,
+      );
+    }
+  }
+
+  /// If the OS killed the app mid-session, pick the session back up.
+  Future<void> _restoreActiveSession() async {
+    final active = await _repo.findActive();
+    if (!ref.mounted || active == null || state is! FocusIdle) return;
+
+    final pausesBefore = await _repo.pausesUsedOn(
+      active.startedAt,
+      excludeSessionId: active.id,
+    );
+    if (!ref.mounted || state is! FocusIdle) return;
+
+    final now = _clock.now();
+    state = FocusRunning(
+      session: active,
+      now: now,
+      pausesUsedBefore: pausesBefore,
     );
 
-    await repo.upsert(completed);
-    state = FocusSummary(session: completed);
+    if (active.isPaused) return;
+    if (active.remainingAt(now) <= Duration.zero) {
+      // It ran out while the app was dead → complete it.
+      await _finish(completed: true);
+    } else {
+      _startTicker();
+      _scheduleAlarm(active);
+    }
+  }
+
+  /// Tell the phone to notify us when the countdown ends, even if the app is
+  /// backgrounded. Re-scheduling replaces any earlier alarm (same id).
+  void _scheduleAlarm(FocusSession session) {
+    unawaited(
+      _alarm.schedule(
+        at: session.endsAt,
+        focusDuration: session.plannedDuration,
+      ),
+    );
   }
 }
 
-// ---------------------------------------------------------------------------
-// Additional provider: focusImmersiveProvider
-// ---------------------------------------------------------------------------
-// FIX 7: app_shell.dart referenced `focusImmersiveProvider` which was never
-// declared anywhere.  It is a derived provider that returns true when the
-// focus timer is actively running (used to hide the bottom nav bar).
-
-/// Returns `true` while the focus timer is actively running (not paused,
-/// not in setup, not in summary).  Used by [AppShell] to hide the bottom
-/// navigation bar during an immersive focus session.
+/// True while the Focus tab is in a full-screen phase (setup / running /
+/// summary). The app shell hides the bottom navigation then.
 @riverpod
 bool focusImmersive(Ref ref) {
   final state = ref.watch(focusSessionControllerProvider);
-  return state is FocusRunning && !state.isPaused;
+  return state is! FocusIdle;
 }

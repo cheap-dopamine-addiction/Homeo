@@ -1,130 +1,211 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:homeo/features/focus_session/domain/focus_session_state.dart';
-import 'package:homeo/features/focus_session/domain/session_reflection.dart';
-import 'package:homeo/features/focus_session/presentation/providers/focus_session_controller.dart';
+import 'dart:math' as math;
 
-/// Shown when state is [FocusRunning].
-///
-/// Displays the countdown timer, pause/resume controls, and an early-end
-/// option.
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:homeo/core/theme/app_colors.dart';
+import 'package:homeo/core/theme/app_dimens.dart';
+import 'package:homeo/core/theme/app_theme.dart';
+import 'package:homeo/core/utils/duration_format.dart';
+import 'package:homeo/features/focus_session/domain/focus_rules.dart';
+import 'package:homeo/features/focus_session/domain/focus_session_state.dart';
+import 'package:homeo/features/focus_session/presentation/providers/focus_session_controller.dart';
+import 'package:homeo/features/focus_session/presentation/widgets/exit_gate_sheet.dart';
+import 'package:homeo/features/focus_session/presentation/widgets/pause_limit_sheet.dart';
+import 'package:homeo/features/focus_session/presentation/widgets/timer_ring.dart';
+import 'package:homeo/features/friction/presentation/widgets/emergency_override_sheet.dart';
+import 'package:homeo/l10n/l10n.dart';
+
+/// Focus tab, running/paused phase. Always dark (calm, low-stimulus),
+/// regardless of the app theme.
 class ActiveSessionView extends ConsumerWidget {
   const ActiveSessionView({super.key});
 
+  Future<void> _requestExit(BuildContext context, WidgetRef ref) async {
+    final result = await showExitGateSheet(context);
+    if (result == null || !result.leave) return; // dismissed = stay
+    await ref
+        .read(focusSessionControllerProvider.notifier)
+        .abort(reason: result.reason);
+  }
+
+  void _togglePause(BuildContext context, WidgetRef ref, FocusRunning run) {
+    final controller = ref.read(focusSessionControllerProvider.notifier);
+    if (run.isPaused) {
+      controller.resume();
+      return;
+    }
+    if (controller.pause() == PauseOutcome.limitReached) {
+      showPauseLimitSheet(
+        context,
+        used: run.pausesUsedToday,
+        total: FocusRules.maxPausesPerDay,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(focusSessionControllerProvider) as FocusRunning;
-    final notifier = ref.read(focusSessionControllerProvider.notifier);
-    final theme = Theme.of(context);
+    final run = ref.watch(focusSessionControllerProvider);
+    if (run is! FocusRunning) return const SizedBox.shrink();
 
-    final remaining = state.remaining;
-    final minutes = remaining.inMinutes.toString().padLeft(2, '0');
-    final seconds = (remaining.inSeconds % 60).toString().padLeft(2, '0');
+    return Theme(
+      data: AppTheme.dark,
+      child: Builder(
+        builder: (context) {
+          final l10n = context.l10n;
+          final colors = AppColors.of(context);
+          final text = Theme.of(context).textTheme;
 
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Task label
-          if (state.session.taskLabel != null) ...[
-            Text(
-              state.session.taskLabel!,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.6),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-          ],
+          final status = run.isPaused
+              ? l10n.activeStatusPaused
+              : l10n.activeStatusFocusing;
+          final time = formatClock(Duration(seconds: run.remainingSeconds));
+          final intention = run.session.intention;
 
-          // Progress ring + timer
-          Center(
-            child: SizedBox(
-              width: 220,
-              height: 220,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  CircularProgressIndicator(
-                    value: state.progress,
-                    strokeWidth: 10,
-                    backgroundColor:
-                        theme.colorScheme.primary.withOpacity(0.15),
-                  ),
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '$minutes:$seconds',
-                        style: theme.textTheme.displayMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          fontFeatures: const [FontFeature.tabularFigures()],
+          return PopScope(
+            canPop: false, // Android back → exit gate, never a silent exit
+            onPopInvokedWithResult: (didPop, _) {
+              if (!didPop) _requestExit(context, ref);
+            },
+            child: AnnotatedRegion<SystemUiOverlayStyle>(
+              // Light status-bar icons: this screen is dark in both themes.
+              value: SystemUiOverlayStyle.light,
+              child: ColoredBox(
+                color: colors.focusCanvas,
+                child: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.xl),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Align(
+                          alignment: AlignmentDirectional.centerEnd,
+                          child: TextButton(
+                            onPressed: () => _requestExit(context, ref),
+                            style: TextButton.styleFrom(
+                              foregroundColor: colors.inkMuted,
+                            ),
+                            child: Text(l10n.activeExit),
+                          ),
                         ),
-                      ),
-                      Text(
-                        state.isPaused ? 'Paused' : 'Focusing',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color:
-                              theme.colorScheme.onSurface.withOpacity(0.5),
+                        if (intention.isNotEmpty)
+                          Container(
+                            padding: const EdgeInsets.all(AppSpacing.lg),
+                            decoration: BoxDecoration(
+                              color: colors.focusSurface,
+                              borderRadius: AppRadius.cardRadius,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.activeGoalLabel,
+                                  style: text.labelSmall?.copyWith(
+                                    color: colors.inkMuted,
+                                  ),
+                                ),
+                                const SizedBox(height: AppSpacing.xs),
+                                Text(
+                                  intention,
+                                  style: text.bodyLarge,
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                        Expanded(
+                          child: Center(
+                            child: LayoutBuilder(
+                              builder: (context, constraints) => TimerRing(
+                                size: math.min(
+                                  256.0,
+                                  math.min(
+                                    constraints.maxWidth,
+                                    constraints.maxHeight,
+                                  ),
+                                ),
+                                progress: run.progress,
+                                timeLabel: time,
+                                statusLabel: status,
+                                semanticsLabel: l10n.activeTimerSemantics(
+                                  status,
+                                  time,
+                                ),
+                                isPaused: run.isPaused,
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
+                        _PauseBudget(
+                          used: run.pausesUsedToday,
+                          total: FocusRules.maxPausesPerDay,
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        FilledButton(
+                          onPressed: () => _togglePause(context, ref, run),
+                          child: Text(
+                            run.isPaused ? l10n.activeResume : l10n.activePause,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () => showEmergencySheet(context),
+                          style: TextButton.styleFrom(
+                            foregroundColor: colors.inkMuted,
+                          ),
+                          child: Text(l10n.emergencyLink),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
+                ),
               ),
             ),
-          ),
-
-          const SizedBox(height: 40),
-
-          // Controls
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              // End early
-              OutlinedButton.icon(
-                onPressed: () => _confirmEnd(context, notifier),
-                icon: const Icon(Icons.stop_rounded),
-                label: const Text('End'),
-              ),
-              // Pause / Resume
-              FilledButton.icon(
-                onPressed: notifier.togglePause,
-                icon: Icon(state.isPaused
-                    ? Icons.play_arrow_rounded
-                    : Icons.pause_rounded),
-                label: Text(state.isPaused ? 'Resume' : 'Pause'),
-              ),
-            ],
-          ),
-        ],
+          );
+        },
       ),
     );
   }
+}
 
-  Future<void> _confirmEnd(
-      BuildContext context, FocusSessionController notifier) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('End session?'),
-        content: const Text(
-          'Your progress will be saved. Do you want to end this session now?',
+class _PauseBudget extends StatelessWidget {
+  const _PauseBudget({required this.used, required this.total});
+
+  final int used;
+  final int total;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colors = AppColors.of(context);
+    final text = Theme.of(context).textTheme;
+
+    return Column(
+      children: [
+        ExcludeSemantics(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              for (var i = 0; i < total; i++)
+                Container(
+                  width: 28,
+                  height: 6,
+                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                  decoration: BoxDecoration(
+                    color: i < used ? colors.accent : colors.focusSurface,
+                    borderRadius: AppRadius.pillRadius,
+                  ),
+                ),
+            ],
+          ),
         ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel')),
-          FilledButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('End')),
-        ],
-      ),
+        const SizedBox(height: AppSpacing.sm),
+        Text(
+          l10n.activePausesUsed(used, total),
+          style: text.bodySmall?.copyWith(color: colors.inkMuted),
+        ),
+      ],
     );
-    if (confirmed == true) {
-      await notifier.endSessionEarly(reason: ExitReason.userEnded);
-    }
   }
 }

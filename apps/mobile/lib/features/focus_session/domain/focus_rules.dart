@@ -1,50 +1,19 @@
-/// Business rules governing focus-session behaviour.
-///
-/// Centralises constants and validation so they can be unit-tested
-/// independently of UI or infrastructure.
-abstract class FocusRules {
-  FocusRules._();
+/// Product rules for focus sessions (PRD §9.1). One place to tune them.
+abstract final class FocusRules {
+  static const List<int> presetMinutes = [25, 45, 60, 90];
+  static const Duration defaultDuration = Duration(minutes: 25);
+  static const Duration defaultCustomDuration = Duration(minutes: 45);
+  static const Duration minDuration = Duration(minutes: 1);
 
-  // ---------- Duration limits ----------
+  /// PRD §9.1: pauses are limited *per day* so they cannot become a loophole.
+  static const int maxPausesPerDay = 3;
 
-  /// Shortest allowed planned session, in minutes.
-  static const int minPlannedMinutes = 1;
+  /// PRD §9.1: leaving early passes a friction gate (reason + countdown).
+  static const int exitGateCountdownSeconds = 5;
 
-  /// Longest allowed planned session, in minutes.
-  static const int maxPlannedMinutes = 180;
+  static const int maxIntentionLength = 140;
 
-  /// Default planned duration when the user hasn't chosen one yet.
-  static const int defaultPlannedMinutes = 25;
-
-  // ---------- Completion threshold ----------
-
-  /// A session is considered "completed" (not abandoned) when the user has
-  /// focused for at least this fraction of the planned duration.
-  static const double completionThreshold = 0.5;
-
-  /// Minimum elapsed seconds before an intentional "end" counts as completed
-  /// (prevents accidentally completing a 1-second session).
-  static const int minElapsedSecondsForCompletion = 60;
-
-  // ---------- Validation ----------
-
-  /// Returns `true` when [minutes] is within the allowed range.
-  static bool isValidDuration(int minutes) =>
-      minutes >= minPlannedMinutes && minutes <= maxPlannedMinutes;
-
-  /// Whether a session with [elapsedSeconds] out of [plannedSeconds]
-  /// should be marked as [FocusSessionStatus.completed] vs abandoned.
-  static bool isCompleted({
-    required int elapsedSeconds,
-    required int plannedSeconds,
-  }) {
-    if (elapsedSeconds < minElapsedSecondsForCompletion) return false;
-    if (plannedSeconds == 0) return false;
-    return (elapsedSeconds / plannedSeconds) >= completionThreshold;
-  }
-
-  // ---------- Pomodoro presets ----------
-
-  /// Standard Pomodoro-technique preset durations (minutes).
-  static const List<int> presets = [15, 25, 45, 60, 90];
+  /// A broken run shorter than this does not trigger the recovery screen —
+  /// nobody needs a talk after a 1-day "streak".
+  static const int minStreakForRecovery = 2;
 }

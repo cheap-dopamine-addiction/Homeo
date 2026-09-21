@@ -1,144 +1,97 @@
-// FIX: removed `import 'dart:ui';` — all used elements are already
-// exported by flutter/material.dart (dart:ui is redundant here).
+import 'dart:ui' show FontFeature;
+
 import 'package:flutter/material.dart';
 
-/// Typography tokens for the Homeo app.
+/// Type scale — PRD §12.2: Inter (SemiBold headings / Regular body).
 ///
-/// Mirrors the Material 3 type scale so it integrates cleanly with
-/// [ThemeData.textTheme].
-class AppTextStyles {
-  const AppTextStyles._();
+/// Inter has no Thai glyphs, so Noto Sans Thai is the fallback. Line heights
+/// stay ≥ 1.3 everywhere so Thai tone marks are never clipped.
+abstract final class AppTextStyles {
+  static const String fontFamily = 'Inter';
+  static const List<String> fontFamilyFallback = ['NotoSansThai'];
 
-  // ---------- Display ----------
-  static const TextStyle displayLarge = TextStyle(
-    fontSize: 57,
-    fontWeight: FontWeight.w400,
-    letterSpacing: -0.25,
-    height: 1.12,
-  );
-
-  static const TextStyle displayMedium = TextStyle(
-    fontSize: 45,
-    fontWeight: FontWeight.w400,
-    height: 1.16,
-  );
-
-  static const TextStyle displaySmall = TextStyle(
-    fontSize: 36,
-    fontWeight: FontWeight.w400,
-    height: 1.22,
-  );
-
-  // ---------- Headline ----------
-  static const TextStyle headlineLarge = TextStyle(
-    fontSize: 32,
-    fontWeight: FontWeight.w600,
-    height: 1.25,
-  );
-
-  static const TextStyle headlineMedium = TextStyle(
-    fontSize: 28,
-    fontWeight: FontWeight.w600,
-    height: 1.29,
-  );
-
-  static const TextStyle headlineSmall = TextStyle(
-    fontSize: 24,
-    fontWeight: FontWeight.w600,
-    height: 1.33,
-  );
-
-  // ---------- Title ----------
-  static const TextStyle titleLarge = TextStyle(
-    fontSize: 22,
-    fontWeight: FontWeight.w600,
-    height: 1.27,
-  );
-
-  static const TextStyle titleMedium = TextStyle(
-    fontSize: 16,
-    fontWeight: FontWeight.w600,
-    letterSpacing: 0.15,
-    height: 1.5,
-  );
-
-  static const TextStyle titleSmall = TextStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.w600,
-    letterSpacing: 0.1,
-    height: 1.43,
-  );
-
-  // ---------- Body ----------
-  static const TextStyle bodyLarge = TextStyle(
-    fontSize: 16,
-    fontWeight: FontWeight.w400,
-    letterSpacing: 0.5,
-    height: 1.5,
-  );
-
-  static const TextStyle bodyMedium = TextStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.w400,
-    letterSpacing: 0.25,
-    height: 1.43,
-  );
-
-  static const TextStyle bodySmall = TextStyle(
-    fontSize: 12,
-    fontWeight: FontWeight.w400,
-    letterSpacing: 0.4,
-    height: 1.33,
-  );
-
-  // ---------- Label ----------
-  static const TextStyle labelLarge = TextStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.w500,
-    letterSpacing: 0.1,
-    height: 1.43,
-  );
-
-  static const TextStyle labelMedium = TextStyle(
-    fontSize: 12,
-    fontWeight: FontWeight.w500,
-    letterSpacing: 0.5,
-    height: 1.33,
-  );
-
-  static const TextStyle labelSmall = TextStyle(
-    fontSize: 11,
-    fontWeight: FontWeight.w500,
-    letterSpacing: 0.5,
+  static const TextStyle _base = TextStyle(
+    fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
+    letterSpacing: 0,
     height: 1.45,
   );
 
-  // ---------- Semantic aliases ----------
-  static const TextStyle buttonText = labelLarge;
-  static const TextStyle captionText = bodySmall;
-  static const TextStyle overline = TextStyle(
-    fontSize: 10,
-    fontWeight: FontWeight.w500,
-    letterSpacing: 1.5,
-    height: 1.6,
+  /// Countdown digits. Tabular figures stop the timer from jittering.
+  static final TextStyle timer = _base.copyWith(
+    fontSize: 56,
+    fontWeight: FontWeight.w600,
+    height: 1.15,
+    fontFeatures: const [FontFeature.tabularFigures()],
   );
 
-  /// Convenience: returns a full [TextTheme] using these styles.
-  static TextTheme get textTheme => const TextTheme(
-        displayLarge: displayLarge,
-        displayMedium: displayMedium,
-        displaySmall: displaySmall,
-        headlineLarge: headlineLarge,
-        headlineMedium: headlineMedium,
-        headlineSmall: headlineSmall,
-        titleLarge: titleLarge,
-        titleMedium: titleMedium,
-        titleSmall: titleSmall,
-        bodyLarge: bodyLarge,
-        bodyMedium: bodyMedium,
-        bodySmall: bodySmall,
-        labelLarge: labelLarge,
-        labelMedium: labelMedium,
-        labelSmall: labelSmall,
-      );
+  static final TextStyle headline = _base.copyWith(
+    fontSize: 26,
+    fontWeight: FontWeight.w600,
+    height: 1.3,
+  );
+  static final TextStyle titleLarge = _base.copyWith(
+    fontSize: 22,
+    fontWeight: FontWeight.w600,
+    height: 1.3,
+  );
+  static final TextStyle titleMedium = _base.copyWith(
+    fontSize: 17,
+    fontWeight: FontWeight.w600,
+    height: 1.35,
+  );
+  static final TextStyle titleSmall = _base.copyWith(
+    fontSize: 15,
+    fontWeight: FontWeight.w600,
+    height: 1.4,
+  );
+
+  static final TextStyle bodyLarge = _base.copyWith(
+    fontSize: 16,
+    fontWeight: FontWeight.w400,
+  );
+  static final TextStyle bodyMedium = _base.copyWith(
+    fontSize: 15,
+    fontWeight: FontWeight.w400,
+  );
+  static final TextStyle bodySmall = _base.copyWith(
+    fontSize: 13,
+    fontWeight: FontWeight.w400,
+  );
+
+  static final TextStyle labelLarge = _base.copyWith(
+    fontSize: 15,
+    fontWeight: FontWeight.w600,
+    height: 1.3,
+  );
+  static final TextStyle labelMedium = _base.copyWith(
+    fontSize: 13,
+    fontWeight: FontWeight.w600,
+    height: 1.3,
+  );
+  static final TextStyle labelSmall = _base.copyWith(
+    fontSize: 12,
+    fontWeight: FontWeight.w600,
+    height: 1.3,
+  );
+
+  /// Maps the scale onto Material's slots.
+  ///
+  ///   displayLarge   → timer
+  ///   headlineMedium → screen title
+  static TextTheme textTheme({required Color ink}) {
+    return TextTheme(
+      displayLarge: timer,
+      headlineMedium: headline,
+      titleLarge: titleLarge,
+      titleMedium: titleMedium,
+      titleSmall: titleSmall,
+      bodyLarge: bodyLarge,
+      bodyMedium: bodyMedium,
+      bodySmall: bodySmall,
+      labelLarge: labelLarge,
+      labelMedium: labelMedium,
+      labelSmall: labelSmall,
+    ).apply(displayColor: ink, bodyColor: ink);
+  }
 }

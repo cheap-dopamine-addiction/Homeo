@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:homeo/l10n/l10n.dart';
+import 'package:homeo/shared/widgets/placeholder_screen.dart';
 
-/// Analytics / insights screen — shows focus trends and streak data.
 class InsightsScreen extends StatelessWidget {
   const InsightsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Insights')),
-      body: const Center(
-        child: Text('Insights coming soon'),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => PlaceholderScreen(
+    title: context.l10n.tabInsights,
+    icon: Icons.bar_chart_rounded,
+  );
 }

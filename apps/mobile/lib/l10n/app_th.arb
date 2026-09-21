@@ -1,0 +1,336 @@
+{
+  "@@locale": "th",
+  "appName": "Homeo",
+  "tabFocus": "Focus",
+  "tabVault": "Vault",
+  "tabInsights": "Insights",
+  "tabAiCoach": "AI Coach",
+  "tabSettings": "Settings",
+  "comingSoon": "ส่วนนี้กำลังพัฒนา",
+  "greetingMorning": "สวัสดีตอนเช้า",
+  "greetingAfternoon": "สวัสดีตอนบ่าย",
+  "greetingEvening": "สวัสดีตอนเย็น",
+  "streakDays": "{count} วันติดต่อกัน",
+  "@streakDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "streakBest": "สูงสุด {count} วัน",
+  "@streakBest": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "streakNone": "เริ่ม streak ใหม่ได้วันนี้",
+  "focusPrompt": "วันนี้อยากทำอะไรให้เสร็จหนึ่งอย่าง?",
+  "focusStartCta": "เริ่ม Focus Session",
+  "statFocusToday": "โฟกัสวันนี้",
+  "statFocusWeek": "โฟกัสสัปดาห์นี้",
+  "statSessionsToday": "Session วันนี้",
+  "lastSessionTitle": "Session ล่าสุด: {duration}",
+  "@lastSessionTitle": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "lastSessionNoIntention": "ไม่ได้ระบุเป้าหมาย",
+  "durationHoursMinutes": "{hours} ชม. {minutes} น.",
+  "@durationHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "durationHoursOnly": "{hours} ชม.",
+  "@durationHoursOnly": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "durationMinutesOnly": "{minutes} น.",
+  "@durationMinutesOnly": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "durationPresetMinutes": "{minutes} นาที",
+  "@durationPresetMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "durationCustom": "กำหนดเอง",
+  "setupTitle": "ตั้งค่า Session",
+  "setupClose": "ปิด",
+  "setupDurationLabel": "ระยะเวลา",
+  "setupIntentionLabel": "เป้าหมายของ session นี้",
+  "setupIntentionHint": "เช่น เขียนรายงาน Chapter 3 ให้เสร็จ",
+  "setupIntentionHelper": "ไม่จำเป็นต้องระบุ — เพื่อเตือนความจำของคุณเอง",
+  "setupStartButton": "เริ่ม Session {duration}",
+  "@setupStartButton": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "pickerTitle": "กำหนดระยะเวลาเอง",
+  "pickerConfirm": "ตกลง",
+  "pickerCancel": "ยกเลิก",
+  "activeStatusFocusing": "กำลังโฟกัส",
+  "activeStatusPaused": "หยุดชั่วคราว",
+  "activeExit": "ออกจาก Session",
+  "activeGoalLabel": "เป้าหมาย",
+  "activePause": "พัก",
+  "activeResume": "กลับมาโฟกัส",
+  "activePausesUsed": "พัก {used}/{total} ครั้งวันนี้",
+  "@activePausesUsed": {
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "activeTimerSemantics": "{status} เหลือ {time}",
+  "@activeTimerSemantics": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "exitGateTitle": "ต้องการออกจาก session จริงๆ ไหม?",
+  "exitGateSubtitle": "ไม่เป็นไร — บอกเหตุผลได้ถ้าอยากบอก",
+  "exitReasonEmergency": "เหตุฉุกเฉิน",
+  "exitReasonTired": "เหนื่อยเกินไป",
+  "exitReasonDistracted": "ไม่มีสมาธิ",
+  "exitReasonOther": "อื่นๆ",
+  "commonBackToFocus": "กลับไปโฟกัส",
+  "exitGateLeave": "ออกจาก session",
+  "exitGateLeaveWait": "ออกจาก session ({seconds}s)",
+  "@exitGateLeaveWait": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "pauseLimitTitle": "ใช้ครบจำนวนพักวันนี้แล้ว ({used}/{total})",
+  "@pauseLimitTitle": {
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "pauseLimitBody": "ลองหายใจเข้าลึกๆ แล้วกลับไปโฟกัสได้เลย\nคุณทำได้ดีมากมาถึงตรงนี้แล้ว",
+  "summaryCompletedTitle": "เยี่ยมมากเลย!",
+  "summaryAbortedTitle": "ขอบคุณที่พยายาม",
+  "summaryFocused": "คุณโฟกัสได้ {duration}",
+  "@summaryFocused": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "summaryAbortedNote": "Session ถูกยกเลิกก่อนเวลา",
+  "summaryMoodQuestion": "ระหว่าง session รู้สึกอย่างไร?",
+  "moodHard": "ยาก",
+  "moodOkay": "ปกติ",
+  "moodGood": "ดี",
+  "moodGreat": "ยอดเยี่ยม",
+  "summarySave": "บันทึกและกลับหน้าหลัก",
+  "summarySkip": "ข้าม",
+  "gateAwarenessTitle": "เปิด {app} ครั้งที่ {count} วันนี้",
+  "@gateAwarenessTitle": {
+    "placeholders": {
+      "app": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "gateMicroTitle": "ยืนยันก่อนเปิด",
+  "gateMicroBody": "ยืนยันว่าต้องการเปิด {app} จริงๆ ลองพิจารณาดูก่อนนะ",
+  "@gateMicroBody": {
+    "placeholders": {
+      "app": {
+        "type": "String"
+      }
+    }
+  },
+  "gateReflectiveTitle": "หยุดสักครู่ — กลับไปโฟกัสกันไหม?",
+  "gateReflectiveBody": "ตอนนี้เป็นช่วงที่คุณตั้งใจปกป้องไว้ ถ้ายังอยากเปิด บอกเราได้ว่าเพราะอะไร",
+  "gateReasonLabel": "เหตุผลที่ต้องการเปิด",
+  "gateReasonHint": "พิมพ์สั้นๆ ก็พอ",
+  "gateReasonRest": "อยากพัก",
+  "gateReasonTask": "มีเรื่องต้องทำ",
+  "gateBlockTitle": "ตอนนี้เป็นช่วง Focus ของคุณ",
+  "gateBlockBody": "ลองกลับไปทำสิ่งที่ตั้งใจไว้ก่อนนะ\nคุณทำได้แน่นอน",
+  "gatePartnerTitle": "ปกป้องร่วมกับ Partner",
+  "gatePartnerBody": "แอปนี้อยู่ระดับ L4 การเปิดต้องผ่านการอนุมัติจาก Vault Partner ของคุณ",
+  "gatePartnerRequest": "ส่งคำขอ Override",
+  "gatePartnerPending": "ส่งคำขอแล้ว — รอ Partner ตอบ",
+  "gatePartnerCoolingOff": "ถ้า Partner ไม่ตอบ จะปลดบล็อกอัตโนมัติใน {time}",
+  "@gatePartnerCoolingOff": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "gatePartnerDenied": "Partner ยังไม่อนุมัติ — กลับไปโฟกัสก่อนนะ",
+  "gateOpenApp": "เปิด {app}",
+  "@gateOpenApp": {
+    "placeholders": {
+      "app": {
+        "type": "String"
+      }
+    }
+  },
+  "gateOpenAppWait": "เปิด {app} ({seconds}s)",
+  "@gateOpenAppWait": {
+    "placeholders": {
+      "app": {
+        "type": "String"
+      },
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "gateConfirm": "ยืนยัน",
+  "gateConfirmWait": "ยืนยัน ({seconds})",
+  "@gateConfirmWait": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "gateEscalatedNote": "เพิ่มระดับอัตโนมัติ เพราะพยายามเปิดหลายครั้งในเวลาสั้นๆ",
+  "gateSessionNote": "กำลังอยู่ในช่วง Focus session",
+  "emergencyLink": "ฉุกเฉิน?",
+  "emergencyTitle": "ต้องการปลดบล็อกทันทีเพื่อเหตุฉุกเฉินใช่ไหม?",
+  "emergencyUsage": "ใช้ฉุกเฉินไปแล้ว {used}/{max} ครั้งเดือนนี้",
+  "@emergencyUsage": {
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "emergencyBody": "การใช้ฉุกเฉินจะปลดบล็อกทันที {minutes} นาที และบันทึกการใช้งานไว้",
+  "@emergencyBody": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "emergencyConfirm": "ใช้ฉุกเฉิน",
+  "emergencyExhaustedTitle": "ใช้ครบโควต้าฉุกเฉินเดือนนี้แล้ว",
+  "emergencyExhaustedBody": "หากเป็นเหตุฉุกเฉินจริง โทร 1669 (การแพทย์ฉุกเฉิน) หรือ 191 (ตำรวจ) ได้ทันที",
+  "emergencyDone": "ปลดบล็อกแล้ว {minutes} นาที",
+  "@emergencyDone": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsTitle": "ตั้งค่า",
+  "settingsFrictionTile": "Friction และแอปที่ระวัง",
+  "settingsFrictionTileSubtitle": "ปรับว่าการเปิดแอปเสี่ยงยากแค่ไหน",
+  "frictionScreenTitle": "Friction",
+  "frictionDefaultSection": "ระดับเริ่มต้น",
+  "frictionAppsSection": "แอปที่ระวังเป็นพิเศษ",
+  "frictionAppsHint": "เปิดสวิตช์เพื่อให้แอปนั้นต้องผ่าน friction ก่อนเปิด",
+  "frictionL0Name": "L0 — Awareness",
+  "frictionL0Desc": "แบนเนอร์เตือนเงียบๆ",
+  "frictionL1Name": "L1 — Micro-friction",
+  "frictionL1Desc": "รอสักครู่แล้วยืนยัน",
+  "frictionL2Name": "L2 — Reflective pause",
+  "frictionL2Desc": "บอกเหตุผลก่อนเปิด",
+  "frictionL3Name": "L3 — Full block",
+  "frictionL3Desc": "บล็อกเต็มรูปแบบ (เปิดได้ด้วยฉุกเฉินเท่านั้น)",
+  "frictionL4Name": "L4 — Partner-gated",
+  "frictionL4Desc": "ต้องผ่านการอนุมัติจาก Partner",
+  "frictionL4Locked": "ใช้ได้เมื่อเชื่อมต่อ Vault Partner",
+  "frictionEmergencySection": "ฉุกเฉิน",
+  "frictionDebugSection": "ทดสอบ (เฉพาะ debug)",
+  "frictionDebugSimulate": "จำลองการเปิด {app}",
+  "@frictionDebugSimulate": {
+    "placeholders": {
+      "app": {
+        "type": "String"
+      }
+    }
+  },
+  "recoveryTitle": "streak ของคุณหยุดที่ {days} วัน",
+  "@recoveryTitle": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "recoveryBody": "ไม่เป็นไร — ทุกคนมีวันแบบนี้",
+  "recoveryBest": "streak ที่ดีที่สุดของคุณคือ {best} วัน และยังอยู่ตรงนั้นเสมอ",
+  "@recoveryBest": {
+    "placeholders": {
+      "best": {
+        "type": "int"
+      }
+    }
+  },
+  "recoveryQuestion": "บอกเราได้ถ้าอยากแชร์",
+  "recoveryReasonTired": "เหนื่อยเกินไป",
+  "recoveryReasonEmergency": "มีเหตุฉุกเฉิน",
+  "recoveryReasonMotivation": "ไม่มีแรงจูงใจ",
+  "recoveryRestart": "เริ่มต้นใหม่วันนี้",
+  "recoveryLater": "ไว้ทีหลัง",
+  "alarmTitle": "Session จบแล้ว",
+  "alarmBody": "คุณโฟกัสครบ {duration} แล้ว — กลับมาดูสรุปได้เลย",
+  "@alarmBody": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "alarmChannelName": "Focus session",
+  "alarmChannelDescription": "แจ้งเตือนเมื่อ session จบ"
+}

@@ -1,118 +1,121 @@
-import 'package:homeo/features/focus_session/domain/session_reflection.dart';
+import 'package:flutter/foundation.dart';
 
-// ---------------------------------------------------------------------------
-// Status enum
-// ---------------------------------------------------------------------------
+/// PRD §16.2 `focus_sessions.status`.
+enum FocusSessionStatus { active, completed, aborted }
 
-/// Lifecycle status of a [FocusSession].
-enum FocusSessionStatus {
-  /// Session has been set up but not yet started.
-  idle,
-
-  /// Timer is running.
-  running,
-
-  /// Timer was paused by the user.
-  paused,
-
-  /// Session was abandoned before completion.
-  abandoned,
-
-  /// Session finished — either the planned duration was reached
-  /// or the user ended it manually after a minimum threshold.
-  completed,
-}
-
-// ---------------------------------------------------------------------------
-// Domain model
-// ---------------------------------------------------------------------------
-
-/// Immutable representation of a single focus session.
+/// One focus session.
+///
+/// Time is derived from wall-clock timestamps instead of counting ticks, so
+/// the countdown stays correct when the app is backgrounded, throttled or
+/// killed and restored — a decrementing `setInterval` (as in the React
+/// prototype) drifts in all three cases.
+@immutable
 class FocusSession {
   const FocusSession({
     required this.id,
-    required this.plannedMinutes,
+    required this.intention,
+    required this.plannedDuration,
     required this.startedAt,
-    this.taskLabel,
+    this.status = FocusSessionStatus.active,
+    this.actualDuration = Duration.zero,
     this.endedAt,
-    this.elapsedSeconds = 0,
-    this.status = FocusSessionStatus.idle,
-    this.exitReason,
-    this.mood,
-    this.reflections = const [],
+    this.pauseCount = 0,
+    this.pausedTotal = Duration.zero,
+    this.pausedAt,
   });
 
   final String id;
-
-  /// Optional free-text label the user gives to the session.
-  final String? taskLabel;
-
-  /// How long the user intended to focus, in minutes.
-  final int plannedMinutes;
-
-  /// Actual elapsed time when the session ended, in seconds.
-  final int elapsedSeconds;
-
-  final FocusSessionStatus status;
+  final String intention;
+  final Duration plannedDuration;
   final DateTime startedAt;
+  final FocusSessionStatus status;
+
+  /// Filled in when the session finishes.
+  final Duration actualDuration;
   final DateTime? endedAt;
-  final ExitReason? exitReason;
-  final SessionMood? mood;
-  final List<ReflectionEntry> reflections;
 
-  // ---------- Derived ----------
+  /// How many times this session was paused.
+  final int pauseCount;
 
-  Duration get planned => Duration(minutes: plannedMinutes);
-  Duration get elapsed => Duration(seconds: elapsedSeconds);
+  /// Total time spent in *finished* pauses.
+  final Duration pausedTotal;
 
-  bool get isCompleted => status == FocusSessionStatus.completed;
-  bool get isAbandoned => status == FocusSessionStatus.abandoned;
+  /// Non-null while paused.
+  final DateTime? pausedAt;
 
-  /// Completion ratio in [0, 1].
-  double get completionRatio {
-    final planned = this.planned.inSeconds;
-    if (planned == 0) return 0;
-    return (elapsedSeconds / planned).clamp(0.0, 1.0);
+  bool get isActive => status == FocusSessionStatus.active;
+  bool get isPaused => pausedAt != null;
+
+  /// When the countdown reaches zero, *assuming no further pause*.
+  /// Only meaningful while running (not paused).
+  DateTime get endsAt => startedAt.add(plannedDuration + pausedTotal);
+
+  /// Focused time at [now] (pauses excluded, capped at the planned duration).
+  Duration elapsedAt(DateTime now) {
+    final reference = pausedAt ?? now; // frozen while paused
+    final elapsed = reference.difference(startedAt) - pausedTotal;
+    if (elapsed.isNegative) return Duration.zero;
+    return elapsed > plannedDuration ? plannedDuration : elapsed;
   }
 
-  // ---------- Copy helpers ----------
+  Duration remainingAt(DateTime now) => plannedDuration - elapsedAt(now);
 
-  FocusSession copyWith({
-    String? id,
-    String? taskLabel,
-    int? plannedMinutes,
-    int? elapsedSeconds,
-    FocusSessionStatus? status,
-    DateTime? startedAt,
-    DateTime? endedAt,
-    ExitReason? exitReason,
-    SessionMood? mood,
-    List<ReflectionEntry>? reflections,
-  }) =>
-      FocusSession(
-        id: id ?? this.id,
-        taskLabel: taskLabel ?? this.taskLabel,
-        plannedMinutes: plannedMinutes ?? this.plannedMinutes,
-        elapsedSeconds: elapsedSeconds ?? this.elapsedSeconds,
-        status: status ?? this.status,
-        startedAt: startedAt ?? this.startedAt,
-        endedAt: endedAt ?? this.endedAt,
-        exitReason: exitReason ?? this.exitReason,
-        mood: mood ?? this.mood,
-        reflections: reflections ?? this.reflections,
+  FocusSession paused(DateTime now) {
+    if (isPaused) return this;
+    return _copy(pausedAt: now, pauseCount: pauseCount + 1);
+  }
+
+  FocusSession resumed(DateTime now) {
+    final since = pausedAt;
+    if (since == null) return this;
+    final gap = now.difference(since);
+    return _copy(
+      pausedTotal: pausedTotal + (gap.isNegative ? Duration.zero : gap),
+      clearPausedAt: true,
+    );
+  }
+
+  /// Closes the session.
+  ///
+  /// A completed session reports the planned duration and the *ideal* end
+  /// time, even if the app only noticed later (e.g. it was suspended).
+  FocusSession finished({required DateTime now, required bool completed}) {
+    if (completed) {
+      final idealEnd = startedAt.add(plannedDuration + pausedTotal);
+      return _copy(
+        status: FocusSessionStatus.completed,
+        actualDuration: plannedDuration,
+        endedAt: idealEnd.isBefore(now) ? idealEnd : now,
+        clearPausedAt: true,
       );
+    }
+    return _copy(
+      status: FocusSessionStatus.aborted,
+      actualDuration: elapsedAt(now),
+      endedAt: now,
+    );
+  }
 
-  @override
-  String toString() =>
-      'FocusSession(id: $id, status: $status, planned: ${plannedMinutes}m)';
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is FocusSession &&
-          runtimeType == other.runtimeType &&
-          id == other.id;
-
-  @override
-  int get hashCode => id.hashCode;
+  FocusSession _copy({
+    FocusSessionStatus? status,
+    Duration? actualDuration,
+    DateTime? endedAt,
+    int? pauseCount,
+    Duration? pausedTotal,
+    DateTime? pausedAt,
+    bool clearPausedAt = false,
+  }) {
+    return FocusSession(
+      id: id,
+      intention: intention,
+      plannedDuration: plannedDuration,
+      startedAt: startedAt,
+      status: status ?? this.status,
+      actualDuration: actualDuration ?? this.actualDuration,
+      endedAt: endedAt ?? this.endedAt,
+      pauseCount: pauseCount ?? this.pauseCount,
+      pausedTotal: pausedTotal ?? this.pausedTotal,
+      pausedAt: clearPausedAt ? null : (pausedAt ?? this.pausedAt),
+    );
+  }
 }

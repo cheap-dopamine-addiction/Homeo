@@ -1,73 +1,15 @@
-// ---------------------------------------------------------------------------
-// Enums
-// ---------------------------------------------------------------------------
+/// Post-session mood (PRD §9.1 "Reflection"). Stored as `mood_tag`.
+enum SessionMood { hard, okay, good, great }
 
-/// How the user chose to end a session early.
-enum ExitReason {
-  /// The user tapped "I'm done" — intentional finish.
-  userEnded,
+/// Optional reason given at the exit gate. Stored as `response_text`.
+enum ExitReason { emergency, tired, distracted, other }
 
-  /// Something external interrupted the session.
-  interrupted,
+/// Optional reason on the streak-recovery screen. Stored as `response_text`.
+enum StreakBreakReason { tired, emergency, motivation, other }
 
-  /// User simply dismissed / backgrounded without saving.
-  dismissed,
-}
-
-/// Subjective mood the user reports at the end of a session.
-enum SessionMood {
-  great,
-  good,
-  neutral,
-  tired,
-  distracted,
-}
-
-// ---------------------------------------------------------------------------
-// Reflection prompt keys
-// ---------------------------------------------------------------------------
-
-/// Stable string keys for end-of-session reflection prompts.
-///
-/// Used as the `promptKey` column in the database so that
-/// prompts can be changed without losing historical answers.
-abstract class ReflectionPromptKeys {
-  ReflectionPromptKeys._();
-
-  static const String whatWentWell = 'what_went_well';
-  static const String whatDistracted = 'what_distracted';
-  static const String nextSessionGoal = 'next_session_goal';
-  static const String overallFeeling = 'overall_feeling';
-
-  static const List<String> all = [
-    whatWentWell,
-    whatDistracted,
-    nextSessionGoal,
-    overallFeeling,
-  ];
-}
-
-// ---------------------------------------------------------------------------
-// Value object
-// ---------------------------------------------------------------------------
-
-/// A single reflection answer attached to a [FocusSession].
-class ReflectionEntry {
-  const ReflectionEntry({
-    required this.id,
-    required this.sessionId,
-    required this.promptKey,
-    required this.answer,
-    required this.createdAt,
-  });
-
-  final String id;
-  final String sessionId;
-  final String promptKey;
-  final String answer;
-  final DateTime createdAt;
-
-  @override
-  String toString() =>
-      'ReflectionEntry(promptKey: $promptKey, answer: $answer)';
+/// `reflection_entries.prompt_key` values.
+abstract final class ReflectionPromptKeys {
+  static const String sessionMood = 'session_mood';
+  static const String exitReason = 'session_exit_reason';
+  static const String streakBreakReason = 'streak_break_reason';
 }
