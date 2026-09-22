@@ -157,8 +157,7 @@ void _patchManifest(String path) {
       return;
     }
     final at = _lineStart(s, close);
-    s =
-        '${s.substring(0, at)}        <receiver$nl            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"$nl            android:exported="false" />$nl${s.substring(at)}';
+    s = '${s.substring(0, at)}        <receiver$nl            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"$nl            android:exported="false" />$nl${s.substring(at)}';
     done.add('notification receiver');
   }
 
@@ -195,8 +194,7 @@ void _patchGradle(String path, {required bool kotlin}) {
       !s.contains('coreLibraryDesugaringEnabled')) {
     final compileOptions = RegExp(r'compileOptions\s*\{').firstMatch(s);
     if (compileOptions != null) {
-      s =
-          '${s.substring(0, compileOptions.end)}$nl        $flag${s.substring(compileOptions.end)}';
+      s = '${s.substring(0, compileOptions.end)}$nl        $flag${s.substring(compileOptions.end)}';
       done.add('desugaring flag');
     } else {
       final androidBlock = RegExp(r'\bandroid\s*\{').firstMatch(s);
@@ -204,8 +202,7 @@ void _patchGradle(String path, {required bool kotlin}) {
         _manual('$path: no android { } block found');
         return;
       }
-      s =
-          '${s.substring(0, androidBlock.end)}$nl    compileOptions {$nl        $flag$nl    }${s.substring(androidBlock.end)}';
+      s = '${s.substring(0, androidBlock.end)}$nl    compileOptions {$nl        $flag$nl    }${s.substring(androidBlock.end)}';
       done.add('desugaring flag (new compileOptions)');
     }
   }
@@ -228,8 +225,7 @@ void _patchGradle(String path, {required bool kotlin}) {
       if (literal != null && literal < 23) newValue = '23';
     }
     if (newValue != null) {
-      s =
-          '${s.substring(0, minMatch.start)}${minMatch.group(1)}$newValue${minMatch.group(3)}${s.substring(minMatch.end)}';
+      s = '${s.substring(0, minMatch.start)}${minMatch.group(1)}$newValue${minMatch.group(3)}${s.substring(minMatch.end)}';
       done.add('minSdk >= 23');
     }
   }
@@ -302,8 +298,7 @@ void _patchAppDelegate(String path) {
     final imports = RegExp(r'^import [^\r\n]+', multiLine: true).allMatches(s);
     if (imports.isNotEmpty) {
       final last = imports.last;
-      s =
-          '${s.substring(0, last.end)}${nl}import UserNotifications${s.substring(last.end)}';
+      s = '${s.substring(0, last.end)}${nl}import UserNotifications${s.substring(last.end)}';
     }
   }
 

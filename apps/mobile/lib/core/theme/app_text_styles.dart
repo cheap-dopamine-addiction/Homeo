@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 /// Type scale — PRD §12.2: Inter (SemiBold headings / Regular body).

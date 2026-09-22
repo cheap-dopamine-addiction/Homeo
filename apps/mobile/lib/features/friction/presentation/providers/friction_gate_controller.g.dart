@@ -60,7 +60,7 @@ final class FrictionGateControllerProvider
 }
 
 String _$frictionGateControllerHash() =>
-    r'fbdbd14079e7044206bdb90eb017180e0d47ef95';
+    r'21329f3b5b2ef44a377fd401033c9125de54ff02';
 
 /// Decides *whether and how hard* to gate an app launch, shows the gate (via
 /// state), and records how it ended (PRD §9.3, §11).
