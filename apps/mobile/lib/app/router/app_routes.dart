@@ -5,4 +5,5 @@ abstract final class AppRoutes {
   static const String aiCoach = '/coach';
   static const String settings = '/settings';
   static const String frictionSettings = '/settings/friction';
+  static const String detectionSettings = '/settings/detection';
 }

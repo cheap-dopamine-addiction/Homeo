@@ -8,6 +8,7 @@ import 'package:homeo/features/focus_session/domain/focus_rules.dart';
 import 'package:homeo/features/focus_session/domain/focus_session_state.dart';
 import 'package:homeo/features/focus_session/domain/session_reflection.dart';
 import 'package:homeo/features/focus_session/presentation/providers/focus_session_controller.dart';
+import 'package:homeo/features/friction/presentation/widgets/emergency_override_sheet.dart';
 import 'package:homeo/l10n/l10n.dart';
 import 'package:homeo/shared/widgets/choice_pill.dart';
 
@@ -134,6 +135,11 @@ class _ExitGateSheetState extends ConsumerState<_ExitGateSheet> {
                     ? l10n.exitGateLeave
                     : l10n.exitGateLeaveWait(_remaining),
               ),
+            ),
+            TextButton(
+              onPressed: () => showEmergencySheet(context),
+              style: TextButton.styleFrom(foregroundColor: colors.inkMuted),
+              child: Text(l10n.emergencyLink),
             ),
           ],
         ),

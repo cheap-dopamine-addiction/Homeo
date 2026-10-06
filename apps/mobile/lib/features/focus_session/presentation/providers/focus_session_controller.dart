@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:homeo/core/notifications/notification_service.dart';
 import 'package:homeo/core/time/clock.dart';
 import 'package:homeo/features/focus_session/data/focus_session_repository.dart';
 import 'package:homeo/features/focus_session/data/session_alarm.dart';
@@ -77,6 +78,13 @@ class FocusSessionController extends _$FocusSessionController {
       );
       _startTicker();
       _scheduleAlarm(session);
+
+      // "Session started" notification (best effort, never throws).
+      unawaited(
+        ref
+            .read(notificationServiceProvider)
+            .showFocusStartedNotification(duration),
+      );
     } finally {
       _starting = false;
     }

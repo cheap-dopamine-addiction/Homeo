@@ -308,6 +308,12 @@ abstract class AppLocalizations {
   /// **'ยกเลิก'**
   String get pickerCancel;
 
+  /// No description provided for @pickerLongSessionHint.
+  ///
+  /// In th, this message translates to:
+  /// **'session ยาวกว่า 2 ชั่วโมง — ลองพักสั้นๆ ระหว่างนั้นนะ'**
+  String get pickerLongSessionHint;
+
   /// No description provided for @activeStatusFocusing.
   ///
   /// In th, this message translates to:
@@ -692,6 +698,18 @@ abstract class AppLocalizations {
   /// **'ปรับว่าการเปิดแอปเสี่ยงยากแค่ไหน'**
   String get settingsFrictionTileSubtitle;
 
+  /// No description provided for @settingsDetectionTile.
+  ///
+  /// In th, this message translates to:
+  /// **'การตรวจจับและแจ้งเตือน'**
+  String get settingsDetectionTile;
+
+  /// No description provided for @settingsDetectionTileSubtitle.
+  ///
+  /// In th, this message translates to:
+  /// **'ตั้งค่าให้ Homeo แจ้งเตือนเมื่อเปิดแอปที่ระวัง'**
+  String get settingsDetectionTileSubtitle;
+
   /// No description provided for @frictionScreenTitle.
   ///
   /// In th, this message translates to:
@@ -877,6 +895,258 @@ abstract class AppLocalizations {
   /// In th, this message translates to:
   /// **'แจ้งเตือนเมื่อ session จบ'**
   String get alarmChannelDescription;
+
+  /// No description provided for @notifAppOpenedTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'เปิด {app} ครั้งที่ {count} วันนี้'**
+  String notifAppOpenedTitle(String app, int count);
+
+  /// No description provided for @notifAppOpenedBody.
+  ///
+  /// In th, this message translates to:
+  /// **'หยุดสักครู่ — กลับไปโฟกัสกันไหม?'**
+  String get notifAppOpenedBody;
+
+  /// No description provided for @notifFocusStartedTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'เริ่ม Focus Session แล้ว'**
+  String get notifFocusStartedTitle;
+
+  /// No description provided for @notifFocusStartedBody.
+  ///
+  /// In th, this message translates to:
+  /// **'ตั้งเวลา {duration} — ขอให้โฟกัสได้ดี'**
+  String notifFocusStartedBody(String duration);
+
+  /// No description provided for @notifFocusDoneTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'โฟกัสครบแล้ว'**
+  String get notifFocusDoneTitle;
+
+  /// No description provided for @notifFocusDoneBody.
+  ///
+  /// In th, this message translates to:
+  /// **'คุณโฟกัสครบ {duration} เยี่ยมมาก'**
+  String notifFocusDoneBody(String duration);
+
+  /// No description provided for @notifWeeklyTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'สรุปประจำสัปดาห์พร้อมแล้ว'**
+  String get notifWeeklyTitle;
+
+  /// No description provided for @notifWeeklyBody.
+  ///
+  /// In th, this message translates to:
+  /// **'ดูว่าสัปดาห์นี้คุณโฟกัสไปได้เท่าไหร่'**
+  String get notifWeeklyBody;
+
+  /// No description provided for @notifChannelFocusName.
+  ///
+  /// In th, this message translates to:
+  /// **'Focus session'**
+  String get notifChannelFocusName;
+
+  /// No description provided for @notifChannelFocusDesc.
+  ///
+  /// In th, this message translates to:
+  /// **'แจ้งเตือนเมื่อเริ่มและจบ session'**
+  String get notifChannelFocusDesc;
+
+  /// No description provided for @notifChannelAppOpenedName.
+  ///
+  /// In th, this message translates to:
+  /// **'เตือนเมื่อเปิดแอปที่ระวัง'**
+  String get notifChannelAppOpenedName;
+
+  /// No description provided for @notifChannelAppOpenedDesc.
+  ///
+  /// In th, this message translates to:
+  /// **'แจ้งเตือนเมื่อคุณเปิดแอปที่ตั้งไว้ว่าอยากลด'**
+  String get notifChannelAppOpenedDesc;
+
+  /// No description provided for @notifChannelWeeklyName.
+  ///
+  /// In th, this message translates to:
+  /// **'สรุปประจำสัปดาห์'**
+  String get notifChannelWeeklyName;
+
+  /// No description provided for @notifChannelWeeklyDesc.
+  ///
+  /// In th, this message translates to:
+  /// **'แจ้งเตือนสรุปทุกสัปดาห์'**
+  String get notifChannelWeeklyDesc;
+
+  /// No description provided for @detectTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'การตรวจจับแอป'**
+  String get detectTitle;
+
+  /// No description provided for @detectIntro.
+  ///
+  /// In th, this message translates to:
+  /// **'Homeo จะแจ้งเตือนเมื่อคุณเปิดแอปที่เลือกไว้ และบันทึกลงเครื่องของคุณเท่านั้น'**
+  String get detectIntro;
+
+  /// No description provided for @detectManageApps.
+  ///
+  /// In th, this message translates to:
+  /// **'เลือกแอปที่ระวัง'**
+  String get detectManageApps;
+
+  /// No description provided for @detectAndroidSection.
+  ///
+  /// In th, this message translates to:
+  /// **'Android — ตั้งค่า 3 ขั้นตอน'**
+  String get detectAndroidSection;
+
+  /// No description provided for @detectAccessTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'เปิด Accessibility Service'**
+  String get detectAccessTitle;
+
+  /// No description provided for @detectAccessBody.
+  ///
+  /// In th, this message translates to:
+  /// **'ใช้ตรวจว่าแอปไหนขึ้นมาอยู่หน้าจอ Homeo ไม่อ่านเนื้อหาบนจอ ดูแค่ชื่อแอป'**
+  String get detectAccessBody;
+
+  /// No description provided for @detectNotifTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'อนุญาตการแจ้งเตือน'**
+  String get detectNotifTitle;
+
+  /// No description provided for @detectNotifBody.
+  ///
+  /// In th, this message translates to:
+  /// **'ถ้าไม่อนุญาต Android จะไม่แสดงการเตือนเลย'**
+  String get detectNotifBody;
+
+  /// No description provided for @detectBatteryTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'ไม่จำกัดแบตเตอรี่'**
+  String get detectBatteryTitle;
+
+  /// No description provided for @detectBatteryBody.
+  ///
+  /// In th, this message translates to:
+  /// **'ช่วยให้ระบบไม่ปิด Homeo เบื้องหลัง'**
+  String get detectBatteryBody;
+
+  /// No description provided for @detectOemTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'มือถือ Xiaomi / Oppo / Vivo / Huawei'**
+  String get detectOemTitle;
+
+  /// No description provided for @detectOemBody.
+  ///
+  /// In th, this message translates to:
+  /// **'ยี่ห้อเหล่านี้มักปิดแอปเบื้องหลังเอง ให้เปิด Autostart และปิด Battery Saver ของ Homeo ในการตั้งค่าของเครื่อง ไม่อย่างนั้นการเตือนอาจหายไปเป็นบางครั้ง'**
+  String get detectOemBody;
+
+  /// No description provided for @detectAllow.
+  ///
+  /// In th, this message translates to:
+  /// **'อนุญาต'**
+  String get detectAllow;
+
+  /// No description provided for @detectOpenSettings.
+  ///
+  /// In th, this message translates to:
+  /// **'เปิดการตั้งค่า'**
+  String get detectOpenSettings;
+
+  /// No description provided for @detectStatusOn.
+  ///
+  /// In th, this message translates to:
+  /// **'เปิดอยู่'**
+  String get detectStatusOn;
+
+  /// No description provided for @detectStatusOff.
+  ///
+  /// In th, this message translates to:
+  /// **'ยังไม่เปิด'**
+  String get detectStatusOff;
+
+  /// No description provided for @detectIosSection.
+  ///
+  /// In th, this message translates to:
+  /// **'iPhone — ตั้งค่าผ่าน Shortcuts'**
+  String get detectIosSection;
+
+  /// No description provided for @detectIosStep1.
+  ///
+  /// In th, this message translates to:
+  /// **'1. เปิดแอป Shortcuts → แท็บ Automation → + → Create Personal Automation'**
+  String get detectIosStep1;
+
+  /// No description provided for @detectIosStep2.
+  ///
+  /// In th, this message translates to:
+  /// **'2. เลือก App แล้วเลือกแอปที่ต้องการ ตั้งเป็น Is Opened'**
+  String get detectIosStep2;
+
+  /// No description provided for @detectIosStep3.
+  ///
+  /// In th, this message translates to:
+  /// **'3. เลือก Open URLs แล้ววางลิงก์ของแอปนั้นจากด้านล่าง'**
+  String get detectIosStep3;
+
+  /// No description provided for @detectIosStep4.
+  ///
+  /// In th, this message translates to:
+  /// **'4. ปิด Ask Before Running แล้วทำซ้ำทีละแอป'**
+  String get detectIosStep4;
+
+  /// No description provided for @detectIosCopyLink.
+  ///
+  /// In th, this message translates to:
+  /// **'คัดลอกลิงก์'**
+  String get detectIosCopyLink;
+
+  /// No description provided for @detectIosCopied.
+  ///
+  /// In th, this message translates to:
+  /// **'คัดลอกลิงก์แล้ว'**
+  String get detectIosCopied;
+
+  /// No description provided for @detectIosLimitsTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'ข้อจำกัดบน iPhone'**
+  String get detectIosLimitsTitle;
+
+  /// No description provided for @detectIosLimit1.
+  ///
+  /// In th, this message translates to:
+  /// **'ต้องตั้งทีละแอป'**
+  String get detectIosLimit1;
+
+  /// No description provided for @detectIosLimit2.
+  ///
+  /// In th, this message translates to:
+  /// **'คุณลบ Automation เองได้ตลอดเวลา จึงไม่มีการล็อกจริง'**
+  String get detectIosLimit2;
+
+  /// No description provided for @detectIosLimit3.
+  ///
+  /// In th, this message translates to:
+  /// **'อาจมีการหน่วงเล็กน้อย ไม่ทันทีเหมือน Android'**
+  String get detectIosLimit3;
+
+  /// No description provided for @detectNoBlockNote.
+  ///
+  /// In th, this message translates to:
+  /// **'Homeo แจ้งเตือนเท่านั้น ไม่ได้บล็อกหรือปิดแอปของคุณ'**
+  String get detectNoBlockNote;
 }
 
 class _AppLocalizationsDelegate

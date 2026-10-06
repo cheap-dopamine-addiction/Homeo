@@ -63,7 +63,7 @@ final class FocusSessionControllerProvider
 }
 
 String _$focusSessionControllerHash() =>
-    r'864ae6efaee34f5ade05cf0c8b6b18cd06ada0c4';
+    r'f35800697078da566e6b5041300d32d742d722b6';
 
 /// Owns the whole session lifecycle: setup → running/paused → summary → idle.
 ///

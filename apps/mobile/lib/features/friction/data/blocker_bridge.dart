@@ -6,30 +6,55 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'blocker_bridge.g.dart';
 
-/// Contract with the native (Kotlin / Swift) blocker.
+/// One "watched app was opened" record captured natively (Android) while the
+/// Flutter engine may have been asleep.
+@immutable
+class NativeDistractionOpen {
+  const NativeDistractionOpen({
+    required this.packageId,
+    required this.timestampMs,
+  });
+
+  final String packageId;
+
+  /// Epoch milliseconds.
+  final int timestampMs;
+}
+
+/// Contract with the native (Kotlin / Swift) side.
 ///
-/// Dart owns *policy* (which friction, logging, quotas); native owns
-/// *enforcement* (noticing an app launch, keeping it blocked). Channel
-/// `com.cheapdopamine.homeo/blocker`:
+/// Scope: **warning only — nothing is ever blocked or killed.** Native
+/// *detects* a watched app coming to the foreground, notifies the user, and
+/// keeps a queue of events; Dart owns policy and the local DB.
 ///
-///  native → Dart
-///    `onAttempt(String packageId)` — the user tried to open a watched app.
+/// Channel `com.cheapdopamine.homeo/friction`
+///
 ///  Dart → native
-///    `syncBlockedApps(List<String>)` — the current watch list.
-///    `allow({packageId, seconds})`   — let this app through for a while.
-///    `allowAll({seconds})`           — emergency: let everything through.
-///    `returnHome()`                  — leave the blocked app (go to home).
+///    `isAccessibilityEnabled() → bool`
+///    `openAccessibilitySettings()`
+///    `setBlockedPackages(List<String>)` — stored in `FlutterSharedPreferences`
+///        under `flutter.blocked_packages`, read by the accessibility service.
+///    `drainPendingEvents() → List<{app, ts}>` — events not yet imported.
+///    `ackPendingEvents({upTo})` — remove events with `ts <= upTo` (call only
+///        after they are safely in the DB).
+///    `isIgnoringBatteryOptimizations() → bool`
+///    `requestIgnoreBatteryOptimizations()`
+///    `allow({packageId, seconds})` / `allowAll({seconds})` — mute warnings.
+///    `returnHome()` — go to the launcher (user pressed "back to focus").
+///  native → Dart
+///    `onAttempt(String packageId)` — optional; only used by the debug gate.
 ///
-/// Until the native side ships, calls are no-ops (MissingPluginException is
-/// swallowed) and nothing emits on [attempts] — the debug simulator in
-/// Settings ▸ Friction drives the gate instead.
-///
-/// Native design note: the blocker must keep working with the Flutter engine
-/// stopped, and enforce the last synced list itself. `attempts` only reaches
-/// Dart when the engine is alive.
+/// Every call is a no-op / default on platforms without the native half
+/// (iOS, tests): MissingPluginException is swallowed.
 abstract interface class BlockerBridge {
   Stream<String> get attempts;
+  Future<bool> isAccessibilityEnabled();
+  Future<void> openAccessibilitySettings();
+  Future<bool> isIgnoringBatteryOptimizations();
+  Future<void> requestIgnoreBatteryOptimizations();
   Future<void> syncBlockedApps(List<String> packageIds);
+  Future<List<NativeDistractionOpen>> drainPendingEvents();
+  Future<void> ackPendingEvents({required int upTo});
   Future<void> allow(String packageId, Duration window);
   Future<void> allowAll(Duration window);
   Future<void> returnHome();
@@ -40,7 +65,7 @@ class MethodChannelBlockerBridge implements BlockerBridge {
     _channel.setMethodCallHandler(_onCall);
   }
 
-  static const _channel = MethodChannel('com.cheapdopamine.homeo/blocker');
+  static const _channel = MethodChannel('com.cheapdopamine.homeo/friction');
 
   final _attempts = StreamController<String>.broadcast();
 
@@ -55,30 +80,70 @@ class MethodChannelBlockerBridge implements BlockerBridge {
     return null;
   }
 
-  Future<void> _invoke(String method, [Object? arguments]) async {
+  Future<T?> _invoke<T>(String method, [Object? arguments]) async {
     try {
-      await _channel.invokeMethod<void>(method, arguments);
+      return await _channel.invokeMethod<T>(method, arguments);
     } on MissingPluginException {
-      // Native blocker not shipped yet.
+      return null; // native half not available on this platform
     } on PlatformException catch (e) {
       debugPrint('BlockerBridge.$method failed: ${e.message}');
+      return null;
     }
   }
 
   @override
-  Future<void> syncBlockedApps(List<String> packageIds) =>
-      _invoke('syncBlockedApps', packageIds);
+  Future<bool> isAccessibilityEnabled() async =>
+      await _invoke<bool>('isAccessibilityEnabled') ?? false;
 
   @override
-  Future<void> allow(String packageId, Duration window) =>
-      _invoke('allow', {'packageId': packageId, 'seconds': window.inSeconds});
+  Future<void> openAccessibilitySettings() =>
+      _invoke<void>('openAccessibilitySettings');
+
+  @override
+  Future<bool> isIgnoringBatteryOptimizations() async =>
+      await _invoke<bool>('isIgnoringBatteryOptimizations') ?? false;
+
+  @override
+  Future<void> requestIgnoreBatteryOptimizations() =>
+      _invoke<void>('requestIgnoreBatteryOptimizations');
+
+  @override
+  Future<void> syncBlockedApps(List<String> packageIds) =>
+      _invoke<void>('setBlockedPackages', packageIds);
+
+  @override
+  Future<List<NativeDistractionOpen>> drainPendingEvents() async {
+    final raw = await _invoke<List<Object?>>('drainPendingEvents');
+    if (raw == null) return const [];
+
+    final events = <NativeDistractionOpen>[];
+    for (final item in raw) {
+      if (item is! Map) continue;
+      final app = item['app'];
+      final ts = item['ts'];
+      if (app is String && app.isNotEmpty && ts is int) {
+        events.add(NativeDistractionOpen(packageId: app, timestampMs: ts));
+      }
+    }
+    return events;
+  }
+
+  @override
+  Future<void> ackPendingEvents({required int upTo}) =>
+      _invoke<void>('ackPendingEvents', {'upTo': upTo});
+
+  @override
+  Future<void> allow(String packageId, Duration window) => _invoke<void>(
+    'allow',
+    {'packageId': packageId, 'seconds': window.inSeconds},
+  );
 
   @override
   Future<void> allowAll(Duration window) =>
-      _invoke('allowAll', {'seconds': window.inSeconds});
+      _invoke<void>('allowAll', {'seconds': window.inSeconds});
 
   @override
-  Future<void> returnHome() => _invoke('returnHome');
+  Future<void> returnHome() => _invoke<void>('returnHome');
 }
 
 @Riverpod(keepAlive: true)

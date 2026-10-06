@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Homeo needs exactly one thing: which app just came to the foreground.
+  - only window-change events (no clicks, no text),
+  - canRetrieveWindowContent=false: Homeo CANNOT read what is on screen,
+    it only receives the package name (PRD §24.1 data minimisation).
+-->
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityEventTypes="typeWindowStateChanged"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:notificationTimeout="100"
+    android:canRetrieveWindowContent="false"
+    android:description="@string/accessibility_service_description" />

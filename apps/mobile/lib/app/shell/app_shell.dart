@@ -33,6 +33,21 @@ class AppShell extends ConsumerWidget {
     final gate = ref.watch(frictionGateControllerProvider);
     final hideNav = focusImmersive || gateCoversScreen(gate);
 
+    // Bottom sheets (exit gate, pause limit, duration picker, emergency) live
+    // on the root navigator, *above* this shell — a gate that appears while one
+    // is open would be hidden underneath it. Close them first. Every one of
+    // those sheets dismisses as "stay where you were", so this is safe.
+    ref.listen(frictionGateControllerProvider, (previous, next) {
+      if (previous != null || next == null) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return;
+        Navigator.maybeOf(
+          context,
+          rootNavigator: true,
+        )?.popUntil((route) => route is! ModalBottomSheetRoute);
+      });
+    });
+
     return Scaffold(
       body: Stack(
         children: [

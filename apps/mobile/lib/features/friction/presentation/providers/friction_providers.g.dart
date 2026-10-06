@@ -48,12 +48,32 @@ final class BlockedAppsProvider
 
 String _$blockedAppsHash() => r'9cb24a1e32c31121b9765b92db66e95a8f541bff';
 
+/// Emergency unblocks used this calendar month.
+///
+/// The `[from, to)` window is fixed when this provider is built, so a timer
+/// re-builds it at 00:00 on the 1st; otherwise the "used x/y" display would
+/// stay on last month's count until the app is restarted. (Enforcement is
+/// unaffected — `EmergencyController.activate` always recounts from the DB.)
+
 @ProviderFor(emergencyUsesThisMonth)
 final emergencyUsesThisMonthProvider = EmergencyUsesThisMonthProvider._();
+
+/// Emergency unblocks used this calendar month.
+///
+/// The `[from, to)` window is fixed when this provider is built, so a timer
+/// re-builds it at 00:00 on the 1st; otherwise the "used x/y" display would
+/// stay on last month's count until the app is restarted. (Enforcement is
+/// unaffected — `EmergencyController.activate` always recounts from the DB.)
 
 final class EmergencyUsesThisMonthProvider
     extends $FunctionalProvider<AsyncValue<int>, int, Stream<int>>
     with $FutureModifier<int>, $StreamProvider<int> {
+  /// Emergency unblocks used this calendar month.
+  ///
+  /// The `[from, to)` window is fixed when this provider is built, so a timer
+  /// re-builds it at 00:00 on the 1st; otherwise the "used x/y" display would
+  /// stay on last month's count until the app is restarted. (Enforcement is
+  /// unaffected — `EmergencyController.activate` always recounts from the DB.)
   EmergencyUsesThisMonthProvider._()
     : super(
         from: null,
@@ -80,7 +100,7 @@ final class EmergencyUsesThisMonthProvider
 }
 
 String _$emergencyUsesThisMonthHash() =>
-    r'0055776833f3d33fe189664fc6ac4ca58d1e0539';
+    r'4d48a633bf4917476f4b44cb50b3b4fc55e5cc98';
 
 /// Used / limit for the current month, shown in the emergency sheet and in
 /// Settings.

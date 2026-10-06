@@ -130,6 +130,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pickerCancel => 'Cancel';
 
   @override
+  String get pickerLongSessionHint =>
+      'Sessions over 2 hours go better with a short break in between';
+
+  @override
   String get activeStatusFocusing => 'Focusing';
 
   @override
@@ -360,6 +364,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Choose how hard it is to open risky apps';
 
   @override
+  String get settingsDetectionTile => 'Detection and notifications';
+
+  @override
+  String get settingsDetectionTileSubtitle =>
+      'Set up warnings for when you open watched apps';
+
+  @override
   String get frictionScreenTitle => 'Friction';
 
   @override
@@ -460,4 +471,148 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get alarmChannelDescription => 'Tells you when a session ends';
+
+  @override
+  String notifAppOpenedTitle(String app, int count) {
+    return 'Opening $app: time $count today';
+  }
+
+  @override
+  String get notifAppOpenedBody => 'Pause a moment — head back to focus?';
+
+  @override
+  String get notifFocusStartedTitle => 'Focus session started';
+
+  @override
+  String notifFocusStartedBody(String duration) {
+    return 'Timer set for $duration. Good luck.';
+  }
+
+  @override
+  String get notifFocusDoneTitle => 'Focus complete';
+
+  @override
+  String notifFocusDoneBody(String duration) {
+    return 'You focused for $duration. Well done.';
+  }
+
+  @override
+  String get notifWeeklyTitle => 'Your weekly summary is ready';
+
+  @override
+  String get notifWeeklyBody => 'See how much you focused this week';
+
+  @override
+  String get notifChannelFocusName => 'Focus session';
+
+  @override
+  String get notifChannelFocusDesc => 'Session start and finish alerts';
+
+  @override
+  String get notifChannelAppOpenedName => 'Watched app warnings';
+
+  @override
+  String get notifChannelAppOpenedDesc =>
+      'Tells you when you open an app you want to cut down';
+
+  @override
+  String get notifChannelWeeklyName => 'Weekly summary';
+
+  @override
+  String get notifChannelWeeklyDesc => 'Weekly recap reminder';
+
+  @override
+  String get detectTitle => 'App detection';
+
+  @override
+  String get detectIntro =>
+      'Homeo warns you when you open an app you picked and logs it on this device only.';
+
+  @override
+  String get detectManageApps => 'Choose watched apps';
+
+  @override
+  String get detectAndroidSection => 'Android — three steps';
+
+  @override
+  String get detectAccessTitle => 'Turn on the Accessibility service';
+
+  @override
+  String get detectAccessBody =>
+      'Used only to see which app is on screen. Homeo never reads screen content, only the app name.';
+
+  @override
+  String get detectNotifTitle => 'Allow notifications';
+
+  @override
+  String get detectNotifBody =>
+      'Without this, Android silently drops every warning.';
+
+  @override
+  String get detectBatteryTitle => 'Unrestricted battery';
+
+  @override
+  String get detectBatteryBody =>
+      'Keeps the system from stopping Homeo in the background.';
+
+  @override
+  String get detectOemTitle => 'Xiaomi / Oppo / Vivo / Huawei phones';
+
+  @override
+  String get detectOemBody =>
+      'These brands often stop background apps. Turn on Autostart and turn off Battery Saver for Homeo in system settings, or warnings may be missed.';
+
+  @override
+  String get detectAllow => 'Allow';
+
+  @override
+  String get detectOpenSettings => 'Open settings';
+
+  @override
+  String get detectStatusOn => 'On';
+
+  @override
+  String get detectStatusOff => 'Off';
+
+  @override
+  String get detectIosSection => 'iPhone — set up with Shortcuts';
+
+  @override
+  String get detectIosStep1 =>
+      '1. Open Shortcuts → Automation tab → + → Create Personal Automation';
+
+  @override
+  String get detectIosStep2 =>
+      '2. Choose App, pick the app, and set it to Is Opened';
+
+  @override
+  String get detectIosStep3 =>
+      '3. Choose Open URLs and paste that app\'s link from below';
+
+  @override
+  String get detectIosStep4 =>
+      '4. Turn off Ask Before Running, then repeat for each app';
+
+  @override
+  String get detectIosCopyLink => 'Copy link';
+
+  @override
+  String get detectIosCopied => 'Link copied';
+
+  @override
+  String get detectIosLimitsTitle => 'Limits on iPhone';
+
+  @override
+  String get detectIosLimit1 => 'Each app is set up separately';
+
+  @override
+  String get detectIosLimit2 =>
+      'You can delete the automation any time, so nothing is truly locked';
+
+  @override
+  String get detectIosLimit3 => 'There may be a short delay, unlike Android';
+
+  @override
+  String get detectNoBlockNote =>
+      'Homeo only warns you. It never blocks or closes your apps.';
 }

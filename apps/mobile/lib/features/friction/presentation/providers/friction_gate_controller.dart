@@ -204,7 +204,7 @@ class FrictionGateController extends _$FrictionGateController {
 
     final trimmed = reason?.trim();
     if (request.level == FrictionLevel.reflective &&
-        (trimmed?.length ?? 0) < FrictionRules.minReasonLength) {
+        !FrictionRules.isValidReason(trimmed ?? '')) {
       return false;
     }
 
@@ -226,7 +226,7 @@ class FrictionGateController extends _$FrictionGateController {
       return;
     }
     final trimmed = reason.trim();
-    if (trimmed.length < FrictionRules.minReasonLength) return;
+    if (!FrictionRules.isValidReason(trimmed)) return;
 
     state = request.copyWith(
       partner: PartnerStage.pending,

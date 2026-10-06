@@ -78,6 +78,9 @@ abstract final class AppColors {
   static const Color brandAccent = Color(0xFFF59E0B); // Warm Amber
   static const Color brandDanger = Color(0xFFDC2626); // Muted Red
 
+  /// Friction-gate backdrop (prototype: rgba(28,22,53,0.72)).
+  static const Color scrim = Color(0xB81C1635);
+
   // ── Raw palette (Tailwind scale, per PRD "Gray 50–900") ────────────────
   static const Color gray50 = Color(0xFFF9FAFB);
   static const Color gray100 = Color(0xFFF3F4F6);

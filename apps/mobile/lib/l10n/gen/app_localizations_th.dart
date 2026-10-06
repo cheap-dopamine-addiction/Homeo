@@ -131,6 +131,10 @@ class AppLocalizationsTh extends AppLocalizations {
   String get pickerCancel => 'ยกเลิก';
 
   @override
+  String get pickerLongSessionHint =>
+      'session ยาวกว่า 2 ชั่วโมง — ลองพักสั้นๆ ระหว่างนั้นนะ';
+
+  @override
   String get activeStatusFocusing => 'กำลังโฟกัส';
 
   @override
@@ -357,6 +361,13 @@ class AppLocalizationsTh extends AppLocalizations {
   String get settingsFrictionTileSubtitle => 'ปรับว่าการเปิดแอปเสี่ยงยากแค่ไหน';
 
   @override
+  String get settingsDetectionTile => 'การตรวจจับและแจ้งเตือน';
+
+  @override
+  String get settingsDetectionTileSubtitle =>
+      'ตั้งค่าให้ Homeo แจ้งเตือนเมื่อเปิดแอปที่ระวัง';
+
+  @override
   String get frictionScreenTitle => 'Friction';
 
   @override
@@ -457,4 +468,145 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get alarmChannelDescription => 'แจ้งเตือนเมื่อ session จบ';
+
+  @override
+  String notifAppOpenedTitle(String app, int count) {
+    return 'เปิด $app ครั้งที่ $count วันนี้';
+  }
+
+  @override
+  String get notifAppOpenedBody => 'หยุดสักครู่ — กลับไปโฟกัสกันไหม?';
+
+  @override
+  String get notifFocusStartedTitle => 'เริ่ม Focus Session แล้ว';
+
+  @override
+  String notifFocusStartedBody(String duration) {
+    return 'ตั้งเวลา $duration — ขอให้โฟกัสได้ดี';
+  }
+
+  @override
+  String get notifFocusDoneTitle => 'โฟกัสครบแล้ว';
+
+  @override
+  String notifFocusDoneBody(String duration) {
+    return 'คุณโฟกัสครบ $duration เยี่ยมมาก';
+  }
+
+  @override
+  String get notifWeeklyTitle => 'สรุปประจำสัปดาห์พร้อมแล้ว';
+
+  @override
+  String get notifWeeklyBody => 'ดูว่าสัปดาห์นี้คุณโฟกัสไปได้เท่าไหร่';
+
+  @override
+  String get notifChannelFocusName => 'Focus session';
+
+  @override
+  String get notifChannelFocusDesc => 'แจ้งเตือนเมื่อเริ่มและจบ session';
+
+  @override
+  String get notifChannelAppOpenedName => 'เตือนเมื่อเปิดแอปที่ระวัง';
+
+  @override
+  String get notifChannelAppOpenedDesc =>
+      'แจ้งเตือนเมื่อคุณเปิดแอปที่ตั้งไว้ว่าอยากลด';
+
+  @override
+  String get notifChannelWeeklyName => 'สรุปประจำสัปดาห์';
+
+  @override
+  String get notifChannelWeeklyDesc => 'แจ้งเตือนสรุปทุกสัปดาห์';
+
+  @override
+  String get detectTitle => 'การตรวจจับแอป';
+
+  @override
+  String get detectIntro =>
+      'Homeo จะแจ้งเตือนเมื่อคุณเปิดแอปที่เลือกไว้ และบันทึกลงเครื่องของคุณเท่านั้น';
+
+  @override
+  String get detectManageApps => 'เลือกแอปที่ระวัง';
+
+  @override
+  String get detectAndroidSection => 'Android — ตั้งค่า 3 ขั้นตอน';
+
+  @override
+  String get detectAccessTitle => 'เปิด Accessibility Service';
+
+  @override
+  String get detectAccessBody =>
+      'ใช้ตรวจว่าแอปไหนขึ้นมาอยู่หน้าจอ Homeo ไม่อ่านเนื้อหาบนจอ ดูแค่ชื่อแอป';
+
+  @override
+  String get detectNotifTitle => 'อนุญาตการแจ้งเตือน';
+
+  @override
+  String get detectNotifBody => 'ถ้าไม่อนุญาต Android จะไม่แสดงการเตือนเลย';
+
+  @override
+  String get detectBatteryTitle => 'ไม่จำกัดแบตเตอรี่';
+
+  @override
+  String get detectBatteryBody => 'ช่วยให้ระบบไม่ปิด Homeo เบื้องหลัง';
+
+  @override
+  String get detectOemTitle => 'มือถือ Xiaomi / Oppo / Vivo / Huawei';
+
+  @override
+  String get detectOemBody =>
+      'ยี่ห้อเหล่านี้มักปิดแอปเบื้องหลังเอง ให้เปิด Autostart และปิด Battery Saver ของ Homeo ในการตั้งค่าของเครื่อง ไม่อย่างนั้นการเตือนอาจหายไปเป็นบางครั้ง';
+
+  @override
+  String get detectAllow => 'อนุญาต';
+
+  @override
+  String get detectOpenSettings => 'เปิดการตั้งค่า';
+
+  @override
+  String get detectStatusOn => 'เปิดอยู่';
+
+  @override
+  String get detectStatusOff => 'ยังไม่เปิด';
+
+  @override
+  String get detectIosSection => 'iPhone — ตั้งค่าผ่าน Shortcuts';
+
+  @override
+  String get detectIosStep1 =>
+      '1. เปิดแอป Shortcuts → แท็บ Automation → + → Create Personal Automation';
+
+  @override
+  String get detectIosStep2 =>
+      '2. เลือก App แล้วเลือกแอปที่ต้องการ ตั้งเป็น Is Opened';
+
+  @override
+  String get detectIosStep3 =>
+      '3. เลือก Open URLs แล้ววางลิงก์ของแอปนั้นจากด้านล่าง';
+
+  @override
+  String get detectIosStep4 => '4. ปิด Ask Before Running แล้วทำซ้ำทีละแอป';
+
+  @override
+  String get detectIosCopyLink => 'คัดลอกลิงก์';
+
+  @override
+  String get detectIosCopied => 'คัดลอกลิงก์แล้ว';
+
+  @override
+  String get detectIosLimitsTitle => 'ข้อจำกัดบน iPhone';
+
+  @override
+  String get detectIosLimit1 => 'ต้องตั้งทีละแอป';
+
+  @override
+  String get detectIosLimit2 =>
+      'คุณลบ Automation เองได้ตลอดเวลา จึงไม่มีการล็อกจริง';
+
+  @override
+  String get detectIosLimit3 => 'อาจมีการหน่วงเล็กน้อย ไม่ทันทีเหมือน Android';
+
+  @override
+  String get detectNoBlockNote =>
+      'Homeo แจ้งเตือนเท่านั้น ไม่ได้บล็อกหรือปิดแอปของคุณ';
 }

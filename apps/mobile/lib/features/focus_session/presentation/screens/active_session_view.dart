@@ -143,12 +143,17 @@ class ActiveSessionView extends ConsumerWidget {
                           total: FocusRules.maxPausesPerDay,
                         ),
                         const SizedBox(height: AppSpacing.lg),
-                        FilledButton(
-                          onPressed: () => _togglePause(context, ref, run),
-                          child: Text(
-                            run.isPaused ? l10n.activeResume : l10n.activePause,
+                        // Prototype: Pause is secondary, Resume is primary.
+                        if (run.isPaused)
+                          FilledButton(
+                            onPressed: () => _togglePause(context, ref, run),
+                            child: Text(l10n.activeResume),
+                          )
+                        else
+                          OutlinedButton(
+                            onPressed: () => _togglePause(context, ref, run),
+                            child: Text(l10n.activePause),
                           ),
-                        ),
                         TextButton(
                           onPressed: () => showEmergencySheet(context),
                           style: TextButton.styleFrom(

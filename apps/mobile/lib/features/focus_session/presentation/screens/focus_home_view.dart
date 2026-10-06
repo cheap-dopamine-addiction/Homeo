@@ -127,6 +127,7 @@ class _StartCard extends StatelessWidget {
   }
 }
 
+/// Prototype: centre-aligned tile, value in the primary colour.
 class _StatTile extends StatelessWidget {
   const _StatTile({required this.value, required this.label});
 
@@ -146,15 +147,21 @@ class _StatTile extends StatelessWidget {
         border: Border.all(color: colors.border),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           FittedBox(
             fit: BoxFit.scaleDown,
-            alignment: AlignmentDirectional.centerStart,
-            child: Text(value, style: text.titleMedium),
+            child: Text(
+              value,
+              style: text.titleMedium?.copyWith(color: colors.primary),
+            ),
           ),
           const SizedBox(height: AppSpacing.xs),
-          Text(label, style: text.bodySmall?.copyWith(color: colors.inkMuted)),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: text.bodySmall?.copyWith(color: colors.inkMuted),
+          ),
         ],
       ),
     );

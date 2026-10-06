@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="accessibility_service_description">Homeo ดูเพียงว่าคุณเปิดแอปอะไร เพื่อเตือนเมื่อเปิดแอปที่คุณเลือกว่าอยากลด ไม่อ่านเนื้อหาบนหน้าจอ และไม่บล็อกหรือปิดแอปของคุณ</string>
+</resources>

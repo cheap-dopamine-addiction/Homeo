@@ -5,6 +5,7 @@ import 'package:homeo/app/shell/app_shell.dart';
 import 'package:homeo/features/ai_coach/presentation/screens/ai_coach_screen.dart';
 import 'package:homeo/features/analytics/presentation/screens/insights_screen.dart';
 import 'package:homeo/features/focus_session/presentation/screens/focus_screen.dart';
+import 'package:homeo/features/friction/presentation/screens/detection_setup_screen.dart';
 import 'package:homeo/features/friction/presentation/screens/friction_settings_screen.dart';
 import 'package:homeo/features/settings/presentation/screens/settings_screen.dart';
 import 'package:homeo/features/vault_partner/presentation/screens/vault_screen.dart';
@@ -68,6 +69,10 @@ GoRouter appRouter(Ref ref) {
                   GoRoute(
                     path: 'friction',
                     builder: (context, state) => const FrictionSettingsScreen(),
+                  ),
+                  GoRoute(
+                    path: 'detection',
+                    builder: (context, state) => const DetectionSetupScreen(),
                   ),
                 ],
               ),

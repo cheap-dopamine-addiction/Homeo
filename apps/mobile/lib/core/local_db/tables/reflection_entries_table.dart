@@ -4,9 +4,10 @@ import 'package:homeo/core/local_db/tables/focus_sessions_table.dart';
 /// PRD §16.2 `reflection_entries`. Append-only (PRD §22.2), so no conflict
 /// resolution is needed on sync.
 ///
-/// NOTE: PRD §24.3 classifies mood/reflection as High sensitivity
-/// (column-level encryption). Local encryption is not wired yet — tracked as
-/// follow-up before the first beta build.
+/// `mood_tag` and `response_text` hold AES-256-GCM ciphertext (`v1:` + base64)
+/// written by `FocusSessionRepository.saveReflection` through `FieldCipher`
+/// (PRD §24.3: High sensitivity → column-level encryption). Never write plain
+/// text into these columns.
 @DataClassName('ReflectionEntryRow')
 class ReflectionEntries extends Table {
   TextColumn get id => text()();

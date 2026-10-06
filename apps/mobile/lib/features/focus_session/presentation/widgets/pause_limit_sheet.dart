@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:homeo/core/theme/app_colors.dart';
 import 'package:homeo/core/theme/app_dimens.dart';
+import 'package:homeo/features/friction/presentation/widgets/emergency_override_sheet.dart';
 import 'package:homeo/l10n/l10n.dart';
 
 /// Shown when the daily pause budget is spent (PRD §9.1). Supportive tone,
@@ -72,6 +73,11 @@ class _PauseLimitSheet extends StatelessWidget {
             FilledButton(
               onPressed: () => Navigator.of(context).pop(),
               child: Text(l10n.commonBackToFocus),
+            ),
+            TextButton(
+              onPressed: () => showEmergencySheet(context),
+              style: TextButton.styleFrom(foregroundColor: colors.inkMuted),
+              child: Text(l10n.emergencyLink),
             ),
           ],
         ),

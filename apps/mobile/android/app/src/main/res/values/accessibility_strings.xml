@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="accessibility_service_description">Homeo notices which app you open so it can warn you about apps you chose to cut down. It does not read your screen content and never blocks or closes apps.</string>
+</resources>

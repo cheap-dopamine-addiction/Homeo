@@ -1,0 +1,18 @@
+<!--
+  INSERT this block inside the top-level <dict> of ios/Runner/Info.plist
+  (e.g. right before the closing </dict>). Do NOT replace the whole file:
+  your Flutter version may use scene manifests / other keys that must stay.
+  Registers the custom scheme  homeo://  so a Shortcuts automation can open
+  Homeo:  homeo://distraction-event?app=<app_id>
+-->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>homeo.deeplink</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>homeo</string>
+			</array>
+		</dict>
+	</array>

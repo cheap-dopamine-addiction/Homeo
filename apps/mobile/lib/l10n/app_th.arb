@@ -94,6 +94,7 @@
   "pickerTitle": "กำหนดระยะเวลาเอง",
   "pickerConfirm": "ตกลง",
   "pickerCancel": "ยกเลิก",
+  "pickerLongSessionHint": "session ยาวกว่า 2 ชั่วโมง — ลองพักสั้นๆ ระหว่างนั้นนะ",
   "activeStatusFocusing": "กำลังโฟกัส",
   "activeStatusPaused": "หยุดชั่วคราว",
   "activeExit": "ออกจาก Session",
@@ -274,6 +275,8 @@
   "settingsTitle": "ตั้งค่า",
   "settingsFrictionTile": "Friction และแอปที่ระวัง",
   "settingsFrictionTileSubtitle": "ปรับว่าการเปิดแอปเสี่ยงยากแค่ไหน",
+  "settingsDetectionTile": "การตรวจจับและแจ้งเตือน",
+  "settingsDetectionTileSubtitle": "ตั้งค่าให้ Homeo แจ้งเตือนเมื่อเปิดแอปที่ระวัง",
   "frictionScreenTitle": "Friction",
   "frictionDefaultSection": "ระดับเริ่มต้น",
   "frictionAppsSection": "แอปที่ระวังเป็นพิเศษ",
@@ -332,5 +335,71 @@
     }
   },
   "alarmChannelName": "Focus session",
-  "alarmChannelDescription": "แจ้งเตือนเมื่อ session จบ"
+  "alarmChannelDescription": "แจ้งเตือนเมื่อ session จบ",
+  "notifAppOpenedTitle": "เปิด {app} ครั้งที่ {count} วันนี้",
+  "@notifAppOpenedTitle": {
+    "placeholders": {
+      "app": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notifAppOpenedBody": "หยุดสักครู่ — กลับไปโฟกัสกันไหม?",
+  "notifFocusStartedTitle": "เริ่ม Focus Session แล้ว",
+  "notifFocusStartedBody": "ตั้งเวลา {duration} — ขอให้โฟกัสได้ดี",
+  "@notifFocusStartedBody": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "notifFocusDoneTitle": "โฟกัสครบแล้ว",
+  "notifFocusDoneBody": "คุณโฟกัสครบ {duration} เยี่ยมมาก",
+  "@notifFocusDoneBody": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "notifWeeklyTitle": "สรุปประจำสัปดาห์พร้อมแล้ว",
+  "notifWeeklyBody": "ดูว่าสัปดาห์นี้คุณโฟกัสไปได้เท่าไหร่",
+  "notifChannelFocusName": "Focus session",
+  "notifChannelFocusDesc": "แจ้งเตือนเมื่อเริ่มและจบ session",
+  "notifChannelAppOpenedName": "เตือนเมื่อเปิดแอปที่ระวัง",
+  "notifChannelAppOpenedDesc": "แจ้งเตือนเมื่อคุณเปิดแอปที่ตั้งไว้ว่าอยากลด",
+  "notifChannelWeeklyName": "สรุปประจำสัปดาห์",
+  "notifChannelWeeklyDesc": "แจ้งเตือนสรุปทุกสัปดาห์",
+  "detectTitle": "การตรวจจับแอป",
+  "detectIntro": "Homeo จะแจ้งเตือนเมื่อคุณเปิดแอปที่เลือกไว้ และบันทึกลงเครื่องของคุณเท่านั้น",
+  "detectManageApps": "เลือกแอปที่ระวัง",
+  "detectAndroidSection": "Android — ตั้งค่า 3 ขั้นตอน",
+  "detectAccessTitle": "เปิด Accessibility Service",
+  "detectAccessBody": "ใช้ตรวจว่าแอปไหนขึ้นมาอยู่หน้าจอ Homeo ไม่อ่านเนื้อหาบนจอ ดูแค่ชื่อแอป",
+  "detectNotifTitle": "อนุญาตการแจ้งเตือน",
+  "detectNotifBody": "ถ้าไม่อนุญาต Android จะไม่แสดงการเตือนเลย",
+  "detectBatteryTitle": "ไม่จำกัดแบตเตอรี่",
+  "detectBatteryBody": "ช่วยให้ระบบไม่ปิด Homeo เบื้องหลัง",
+  "detectOemTitle": "มือถือ Xiaomi / Oppo / Vivo / Huawei",
+  "detectOemBody": "ยี่ห้อเหล่านี้มักปิดแอปเบื้องหลังเอง ให้เปิด Autostart และปิด Battery Saver ของ Homeo ในการตั้งค่าของเครื่อง ไม่อย่างนั้นการเตือนอาจหายไปเป็นบางครั้ง",
+  "detectAllow": "อนุญาต",
+  "detectOpenSettings": "เปิดการตั้งค่า",
+  "detectStatusOn": "เปิดอยู่",
+  "detectStatusOff": "ยังไม่เปิด",
+  "detectIosSection": "iPhone — ตั้งค่าผ่าน Shortcuts",
+  "detectIosStep1": "1. เปิดแอป Shortcuts → แท็บ Automation → + → Create Personal Automation",
+  "detectIosStep2": "2. เลือก App แล้วเลือกแอปที่ต้องการ ตั้งเป็น Is Opened",
+  "detectIosStep3": "3. เลือก Open URLs แล้ววางลิงก์ของแอปนั้นจากด้านล่าง",
+  "detectIosStep4": "4. ปิด Ask Before Running แล้วทำซ้ำทีละแอป",
+  "detectIosCopyLink": "คัดลอกลิงก์",
+  "detectIosCopied": "คัดลอกลิงก์แล้ว",
+  "detectIosLimitsTitle": "ข้อจำกัดบน iPhone",
+  "detectIosLimit1": "ต้องตั้งทีละแอป",
+  "detectIosLimit2": "คุณลบ Automation เองได้ตลอดเวลา จึงไม่มีการล็อกจริง",
+  "detectIosLimit3": "อาจมีการหน่วงเล็กน้อย ไม่ทันทีเหมือน Android",
+  "detectNoBlockNote": "Homeo แจ้งเตือนเท่านั้น ไม่ได้บล็อกหรือปิดแอปของคุณ"
 }

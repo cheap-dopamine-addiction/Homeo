@@ -5,6 +5,9 @@ abstract final class FocusRules {
   static const Duration defaultCustomDuration = Duration(minutes: 45);
   static const Duration minDuration = Duration(minutes: 1);
 
+  /// Prototype: a soft hint (never a limit) when a custom session is longer.
+  static const Duration longSessionHint = Duration(hours: 2);
+
   /// PRD §9.1: pauses are limited *per day* so they cannot become a loophole.
   static const int maxPausesPerDay = 3;
 

@@ -19,10 +19,13 @@ abstract interface class FrictionRepository {
   Future<void> setBlockedApp(BlockedApp app);
   Future<void> removeBlockedApp(String appPackageId);
 
-  /// Append a resolved gate to the log (PRD §9.3).
+  /// Append a resolved gate / detected open to the log (PRD §9.3).
+  ///
+  /// Idempotent per `event.id`: logging the same id twice keeps the first row
+  /// (needed so re-importing native events after a crash cannot duplicate).
   Future<void> logEvent(DistractionEvent event);
 
-  /// Resolved gates for [appPackageId] at or after [since].
+  /// Logged events for [appPackageId] at or after [since].
   Future<int> countAttemptsSince(String appPackageId, DateTime since);
 
   Future<void> recordEmergency(EmergencyOverride override);
@@ -101,6 +104,7 @@ class DriftFrictionRepository implements FrictionRepository {
             occurredAt: event.occurredAt,
             syncedAt: null,
           ),
+          mode: InsertMode.insertOrIgnore,
         );
   }
 

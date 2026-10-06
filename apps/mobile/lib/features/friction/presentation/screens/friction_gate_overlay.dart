@@ -35,9 +35,15 @@ class FrictionGateOverlay extends ConsumerWidget {
     final controller = ref.read(frictionGateControllerProvider.notifier);
 
     return PopScope(
-      canPop: false, // back = "back to focus", never a silent bypass
+      canPop: false, // back never silently bypasses a gate
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) controller.returnToFocus();
+        if (didPop) return;
+        if (request.level == FrictionLevel.awareness) {
+          // L0 is a passive banner: Back only closes the banner.
+          controller.proceed();
+        } else {
+          controller.returnToFocus();
+        }
       },
       child: switch (request.level) {
         FrictionLevel.awareness => _AwarenessBanner(request: request),
@@ -278,8 +284,8 @@ class _GateCardState extends ConsumerState<_GateCard> {
     super.dispose();
   }
 
-  bool get _hasReason =>
-      _reason.text.trim().length >= FrictionRules.minReasonLength;
+  /// Grapheme-aware (Thai vowel/tone marks do not count as extra characters).
+  bool get _hasReason => FrictionRules.isValidReason(_reason.text);
 
   @override
   Widget build(BuildContext context) {
@@ -301,17 +307,28 @@ class _GateCardState extends ConsumerState<_GateCard> {
       _ => (l10n.gatePartnerTitle, l10n.gatePartnerBody),
     };
 
+    // Bottom sheet over the scrim (prototype): pinned to the bottom edge, top
+    // corners rounded. The scrim is opaque to taps on purpose — a gate only
+    // closes through its explicit buttons (PRD §11.4).
     return ColoredBox(
-      color: Colors.black54,
+      color: AppColors.scrim,
       child: SafeArea(
-        child: Center(
+        bottom: false,
+        child: Align(
+          alignment: Alignment.bottomCenter,
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppSpacing.xl),
             child: Material(
               color: colors.surface,
-              borderRadius: BorderRadius.circular(AppRadius.sheet),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(AppRadius.sheet),
+              ),
               child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.xl),
+                padding: EdgeInsets.fromLTRB(
+                  AppSpacing.xl,
+                  AppSpacing.xl,
+                  AppSpacing.xl,
+                  AppSpacing.xl + MediaQuery.paddingOf(context).bottom,
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,

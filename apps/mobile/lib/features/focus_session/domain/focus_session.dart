@@ -89,10 +89,14 @@ class FocusSession {
         clearPausedAt: true,
       );
     }
+    // `actualDuration` is evaluated against *this* (still paused) session, so
+    // the frozen elapsed time is right; the finished row must not stay
+    // "paused" afterwards.
     return _copy(
       status: FocusSessionStatus.aborted,
       actualDuration: elapsedAt(now),
       endedAt: now,
+      clearPausedAt: true,
     );
   }
 

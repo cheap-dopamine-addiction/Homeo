@@ -26,9 +26,15 @@ dependencies:
   drift: ^2.34.1
   drift_flutter: ^0.3.0
 
-  # Background "session finished" alert
+  # Notifications (session end alarm, app-opened warning, focus, weekly)
   flutter_local_notifications: ^20.1.0
   timezone: any # version is pinned by flutter_local_notifications
+  permission_handler: ^12.0.1 # POST_NOTIFICATIONS (Android 13+)
+
+  # Friction / detection module
+  shared_preferences: ^2.5.3 # blocked_packages lives in FlutterSharedPreferences
+  app_links: ^6.4.0 # iOS Shortcuts deep link: homeo://distraction-event?app=<id>
+  characters: ^1.4.0 # grapheme-aware length for Thai reasons
 
   # Encryption of sensitive fields (PRD §24.3)
   cryptography: ^2.9.0

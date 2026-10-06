@@ -1,13 +1,23 @@
+import 'package:characters/characters.dart';
+
 /// Tunable friction constants. Numbers with a PRD reference follow it; the
 /// rest are product defaults chosen here — flagged so they can be revisited.
 abstract final class FrictionRules {
-  /// PRD §11.2 L1: "5–10 seconds".
-  static const Duration microDelay = Duration(seconds: 7);
+  /// PRD §11.2 L1: "5–10 seconds". 8 s matches the prototype.
+  static const Duration microDelay = Duration(seconds: 8);
 
   /// Wireframe PRD §13.4 (L2 "เปิดต่อ (5s)").
   static const Duration reflectiveDelay = Duration(seconds: 5);
 
+  /// Minimum *visible* characters (grapheme clusters) in a gate reason.
   static const int minReasonLength = 3;
+
+  /// True when [reason] has at least [minReasonLength] user-perceived
+  /// characters. `String.length` counts UTF-16 units, so a Thai syllable with
+  /// vowel/tone marks ("ที่") would count as 2–3 and let an almost empty
+  /// reason through; grapheme clusters count it as 1.
+  static bool isValidReason(String reason) =>
+      reason.trim().characters.length >= minReasonLength;
 
   /// L0 banner auto-dismiss (prototype: 3.5 s).
   static const Duration awarenessBannerDuration = Duration(milliseconds: 3500);

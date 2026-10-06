@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:homeo/core/theme/app_colors.dart';
 import 'package:homeo/core/theme/app_dimens.dart';
 import 'package:homeo/features/focus_session/domain/focus_rules.dart';
 import 'package:homeo/l10n/l10n.dart';
@@ -33,8 +34,10 @@ class _DurationPickerSheetState extends State<_DurationPickerSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final colors = AppColors.of(context);
     final text = Theme.of(context).textTheme;
     final valid = _value >= FocusRules.minDuration;
+    final isLong = _value > FocusRules.longSessionHint;
 
     return SafeArea(
       top: false,
@@ -59,6 +62,38 @@ class _DurationPickerSheetState extends State<_DurationPickerSheet> {
                 onTimerDurationChanged: (d) => setState(() => _value = d),
               ),
             ),
+            // A hint, never a limit (prototype: > 2 hours).
+            if (isLong) ...[
+              const SizedBox(height: AppSpacing.md),
+              Semantics(
+                liveRegion: true,
+                child: Container(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: colors.accentSoft,
+                    borderRadius: AppRadius.cardRadius,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline_rounded,
+                        size: 18,
+                        color: colors.accentText,
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: Text(
+                          l10n.pickerLongSessionHint,
+                          style: text.bodySmall?.copyWith(
+                            color: colors.accentText,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
             const SizedBox(height: AppSpacing.lg),
             Row(
               children: [

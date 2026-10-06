@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:homeo/features/friction/domain/friction_level.dart';
 
 /// How a gate ended (PRD §16.2 `distraction_events.resolved_action`).
+///
+/// Stored by `name`, so only ever append new values.
 enum ResolvedAction {
   returnedToFocus,
   openedAnyway,
@@ -10,6 +12,10 @@ enum ResolvedAction {
   /// Partner did not answer within the cooling-off period (PRD §10.3).
   partnerAutoReleased,
   emergencyOverride,
+
+  /// Warning-only detection (no gate, no blocking): Android accessibility
+  /// event or iOS Shortcuts deep link. The user was notified, nothing more.
+  notified,
 }
 
 @immutable

@@ -14,6 +14,11 @@ class SettingsScreen extends StatelessWidget {
     final colors = AppColors.of(context);
     final text = Theme.of(context).textTheme;
 
+    const tilePadding = EdgeInsets.symmetric(
+      horizontal: AppSpacing.lg,
+      vertical: AppSpacing.xs,
+    );
+
     return SafeArea(
       child: ListView(
         padding: const EdgeInsets.all(AppSpacing.xl),
@@ -22,15 +27,26 @@ class SettingsScreen extends StatelessWidget {
           const SizedBox(height: AppSpacing.xl),
           Card(
             child: ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.lg,
-                vertical: AppSpacing.xs,
-              ),
+              contentPadding: tilePadding,
               leading: Icon(Icons.tune_rounded, color: colors.primary),
               title: Text(l10n.settingsFrictionTile),
               subtitle: Text(l10n.settingsFrictionTileSubtitle),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () => context.push(AppRoutes.frictionSettings),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Card(
+            child: ListTile(
+              contentPadding: tilePadding,
+              leading: Icon(
+                Icons.notifications_active_outlined,
+                color: colors.primary,
+              ),
+              title: Text(l10n.settingsDetectionTile),
+              subtitle: Text(l10n.settingsDetectionTileSubtitle),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.push(AppRoutes.detectionSettings),
             ),
           ),
         ],
