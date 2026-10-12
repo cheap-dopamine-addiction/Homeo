@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:homeo/app/router/app_routes.dart';
 import 'package:homeo/app/shell/app_shell.dart';

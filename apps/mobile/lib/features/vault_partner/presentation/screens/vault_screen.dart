@@ -279,7 +279,10 @@ class _PartnerCard extends ConsumerWidget {
 Future<void> showEditPermissionsSheet(
   BuildContext context,
   VaultPartner partner,
-) => showHomeoSheet<void>(context, (_) => _EditPermissionsSheet(partner: partner));
+) => showHomeoSheet<void>(
+  context,
+  (_) => _EditPermissionsSheet(partner: partner),
+);
 
 class _EditPermissionsSheet extends ConsumerStatefulWidget {
   const _EditPermissionsSheet({required this.partner});
@@ -305,16 +308,18 @@ class _EditPermissionsSheetState extends ConsumerState<_EditPermissionsSheet> {
       children: [
         PermissionPicker(
           selected: _perms,
-          onToggle: (p) =>
-              setState(() => _perms.contains(p) ? _perms.remove(p) : _perms.add(p)),
+          onToggle: (p) => setState(
+            () => _perms.contains(p) ? _perms.remove(p) : _perms.add(p),
+          ),
         ),
         const SizedBox(height: 8),
         GradientButton(
           label: context.tx('บันทึก', 'Save'),
           onPressed: () {
-            ref
-                .read(vaultControllerProvider.notifier)
-                .setPermissions(widget.partner.id, {..._perms});
+            ref.read(vaultControllerProvider.notifier).setPermissions(
+              widget.partner.id,
+              {..._perms},
+            );
             Navigator.of(context).pop();
           },
         ),

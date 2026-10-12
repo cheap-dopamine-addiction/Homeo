@@ -13,6 +13,10 @@ part of 'app_router.dart';
 /// `ShellRoute` rebuilds the tab from scratch every time).
 ///
 /// Branch order must match the destination order in [AppShell].
+///
+/// First launch is redirected to the onboarding flow until
+/// `AppPreferences.onboardingDone` is set; the redirect is re-evaluated
+/// whenever that flag changes.
 
 @ProviderFor(appRouter)
 final appRouterProvider = AppRouterProvider._();
@@ -22,6 +26,10 @@ final appRouterProvider = AppRouterProvider._();
 /// `ShellRoute` rebuilds the tab from scratch every time).
 ///
 /// Branch order must match the destination order in [AppShell].
+///
+/// First launch is redirected to the onboarding flow until
+/// `AppPreferences.onboardingDone` is set; the redirect is re-evaluated
+/// whenever that flag changes.
 
 final class AppRouterProvider
     extends $FunctionalProvider<GoRouter, GoRouter, GoRouter>
@@ -31,6 +39,10 @@ final class AppRouterProvider
   /// `ShellRoute` rebuilds the tab from scratch every time).
   ///
   /// Branch order must match the destination order in [AppShell].
+  ///
+  /// First launch is redirected to the onboarding flow until
+  /// `AppPreferences.onboardingDone` is set; the redirect is re-evaluated
+  /// whenever that flag changes.
   AppRouterProvider._()
     : super(
         from: null,
@@ -64,4 +76,4 @@ final class AppRouterProvider
   }
 }
 
-String _$appRouterHash() => r'25ad43000157ccf21b10b4e8f408e1a2e42e272a';
+String _$appRouterHash() => r'6d48a328ecb78773c234f814f41251af58d33342';

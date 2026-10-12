@@ -15,7 +15,8 @@ String formatDateLabel(BuildContext context, DateTime d) {
 Future<DateTime?> showDateWheelSheet(
   BuildContext context, {
   required DateTime initial,
-}) => showHomeoSheet<DateTime>(context, (_) => _DateWheelSheet(initial: initial));
+}) =>
+    showHomeoSheet<DateTime>(context, (_) => _DateWheelSheet(initial: initial));
 
 class _DateWheelSheet extends StatefulWidget {
   const _DateWheelSheet({required this.initial});
@@ -71,7 +72,8 @@ class _DateWheelSheetState extends State<_DateWheelSheet> {
     final c = AppColors.of(context);
     final locale = Localizations.localeOf(context).toString();
     final months = [
-      for (var m = 1; m <= 12; m++) DateFormat.MMM(locale).format(DateTime(2000, m)),
+      for (var m = 1; m <= 12; m++)
+        DateFormat.MMM(locale).format(DateTime(2000, m)),
     ];
     final style = Theme.of(context).textTheme.titleMedium?.copyWith(
       fontWeight: FontWeight.w700,

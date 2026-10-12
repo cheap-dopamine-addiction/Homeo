@@ -82,8 +82,12 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
       ('Google', false),
       ('Apple', false),
     ];
-    Widget field(String label, TextEditingController ctl, String hint,
-        {TextInputType? type}) {
+    Widget field(
+      String label,
+      TextEditingController ctl,
+      String hint, {
+      TextInputType? type,
+    }) {
       return Padding(
         padding: const EdgeInsets.only(bottom: 12),
         child: Column(
@@ -443,7 +447,8 @@ class _VaultInviteFlowState extends ConsumerState<_VaultInviteFlow> {
     super.initState();
     final r = Random.secure();
     final token = [
-      for (var i = 0; i < 10; i++) 'abcdefghjkmnpqrstuvwxyz23456789'[r.nextInt(31)],
+      for (var i = 0; i < 10; i++)
+        'abcdefghjkmnpqrstuvwxyz23456789'[r.nextInt(31)],
     ].join();
     _link = 'homeo://vault/invite/$token';
   }
@@ -523,7 +528,10 @@ class _VaultInviteFlowState extends ConsumerState<_VaultInviteFlow> {
     switch (_step) {
       case _InviteStep.intro:
         return SheetFrame(
-          title: context.tx('แชร์กับ Vault Partner', 'Share with a Vault Partner'),
+          title: context.tx(
+            'แชร์กับ Vault Partner',
+            'Share with a Vault Partner',
+          ),
           onClose: close,
           children: [
             Text(
@@ -564,7 +572,10 @@ class _VaultInviteFlowState extends ConsumerState<_VaultInviteFlow> {
             ),
             choice(
               context.tx('เชิญโดยตรง', 'Invite directly'),
-              context.tx('เตรียมคำเชิญสำหรับอีเมล', 'Prepare an invitation for an email'),
+              context.tx(
+                'เตรียมคำเชิญสำหรับอีเมล',
+                'Prepare an invitation for an email',
+              ),
               () => setState(() => _step = _InviteStep.email),
             ),
           ],
@@ -604,9 +615,8 @@ class _VaultInviteFlowState extends ConsumerState<_VaultInviteFlow> {
             const SizedBox(height: 10),
             GradientButton(
               label: context.tx('แชร์ผ่าน...', 'Share via...'),
-              onPressed: () => _finishSend(
-                recipient: context.tx('ผู้รับ', 'Recipient'),
-              ),
+              onPressed: () =>
+                  _finishSend(recipient: context.tx('ผู้รับ', 'Recipient')),
             ),
           ],
         );
@@ -622,11 +632,16 @@ class _VaultInviteFlowState extends ConsumerState<_VaultInviteFlow> {
               controller: _email,
               keyboardType: TextInputType.emailAddress,
               onChanged: (_) => setState(() {}),
-              decoration: const InputDecoration(hintText: 'partner@example.com'),
+              decoration: const InputDecoration(
+                hintText: 'partner@example.com',
+              ),
             ),
             const SizedBox(height: 12),
             SectionLabel(
-              context.tx('ข้อความส่วนตัว (ไม่บังคับ)', 'Personal message (optional)'),
+              context.tx(
+                'ข้อความส่วนตัว (ไม่บังคับ)',
+                'Personal message (optional)',
+              ),
             ),
             const SizedBox(height: 6),
             TextField(
@@ -718,7 +733,9 @@ class _VaultInviteFlowState extends ConsumerState<_VaultInviteFlow> {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Expanded(child: Text(context.tx('เตรียมเมื่อ', 'Prepared at'))),
+                      Expanded(
+                        child: Text(context.tx('เตรียมเมื่อ', 'Prepared at')),
+                      ),
                       Text(
                         DateFormat.Hm(locale).format(_sentAt ?? DateTime.now()),
                         style: text.bodyMedium?.copyWith(

@@ -40,10 +40,7 @@ class SettingsScreen extends ConsumerWidget {
         ? context.tx('ยังไม่ได้เพิ่ม', 'Not added')
         : prefs.phone;
 
-    void soon() => showToast(
-      context,
-      context.tx('เร็ว ๆ นี้', 'Coming soon'),
-    );
+    void soon() => showToast(context, context.tx('เร็ว ๆ นี้', 'Coming soon'));
     void noAccount() => showToast(
       context,
       context.tx(
@@ -76,7 +73,11 @@ class SettingsScreen extends ConsumerWidget {
                       color: c.primarySoft,
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.person_outline_rounded, color: c.primary, size: 30),
+                    child: Icon(
+                      Icons.person_outline_rounded,
+                      color: c.primary,
+                      size: 30,
+                    ),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
@@ -140,7 +141,10 @@ class SettingsScreen extends ConsumerWidget {
               children: [
                 _Row(
                   icon: Icons.tune_rounded,
-                  label: context.tx('Friction และแอปที่ระวัง', 'Friction and watched apps'),
+                  label: context.tx(
+                    'Friction และแอปที่ระวัง',
+                    'Friction and watched apps',
+                  ),
                   sub: context.tx(
                     'ตั้งระดับรายแอปและโควต้าฉุกเฉิน',
                     'Per-app levels and emergency quota',
@@ -149,7 +153,10 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 _Row(
                   icon: Icons.notifications_active_outlined,
-                  label: context.tx('การตรวจจับและแจ้งเตือน', 'Detection and notifications'),
+                  label: context.tx(
+                    'การตรวจจับและแจ้งเตือน',
+                    'Detection and notifications',
+                  ),
                   sub: context.tx(
                     'สิทธิ์ที่ต้องเปิดเพื่อให้แจ้งเตือนเมื่อเปิดแอป',
                     'Permissions needed for app-open warnings',
@@ -239,9 +246,27 @@ class SettingsScreen extends ConsumerWidget {
               child: Row(
                 children: [
                   for (final o in [
-                    ('light', Icons.light_mode_outlined, 'Light', 'สว่างตลอดเวลา', 'Always light'),
-                    ('dark', Icons.nightlight_outlined, 'Dark', 'มืดตลอดเวลา', 'Always dark'),
-                    ('auto', Icons.brightness_auto_outlined, 'Auto', 'ตามระบบ', 'Follow system'),
+                    (
+                      'light',
+                      Icons.light_mode_outlined,
+                      'Light',
+                      'สว่างตลอดเวลา',
+                      'Always light',
+                    ),
+                    (
+                      'dark',
+                      Icons.nightlight_outlined,
+                      'Dark',
+                      'มืดตลอดเวลา',
+                      'Always dark',
+                    ),
+                    (
+                      'auto',
+                      Icons.brightness_auto_outlined,
+                      'Auto',
+                      'ตามระบบ',
+                      'Follow system',
+                    ),
                   ])
                     Expanded(
                       child: Padding(
@@ -619,7 +644,9 @@ class _BlockListCardState extends ConsumerState<_BlockListCard> {
                 children: [
                   Text(
                     'App Block List',
-                    style: text.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+                    style: text.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                   Text(
                     context.tx(
@@ -716,7 +743,13 @@ class _FrictionLevelCard extends ConsumerWidget {
       ('L1', 'Micro-Friction', 'ยืนยันก่อนเปิด', 'Confirm before opening', ''),
       ('L2', 'Reflective Pause', 'หยุดคิดก่อน', 'Stop and think first', ''),
       ('L3', 'Full Block', 'บล็อกในช่วง Focus', 'Blocked during focus', ''),
-      ('L4', 'Partner-Gated', 'ต้องมี Partner อนุมัติ', 'Needs Partner approval', ''),
+      (
+        'L4',
+        'Partner-Gated',
+        'ต้องมี Partner อนุมัติ',
+        'Needs Partner approval',
+        '',
+      ),
     ];
 
     return _CardBox(
@@ -731,7 +764,9 @@ class _FrictionLevelCard extends ConsumerWidget {
                 children: [
                   Text(
                     'Friction Level',
-                    style: text.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+                    style: text.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                   Text(
                     context.tx(
@@ -760,7 +795,9 @@ class _FrictionLevelCard extends ConsumerWidget {
                               .read(settingsRepositoryProvider)
                               .save(
                                 settings.copyWith(
-                                  defaultFrictionLevel: FrictionLevel.fromCode(i),
+                                  defaultFrictionLevel: FrictionLevel.fromCode(
+                                    i,
+                                  ),
                                 ),
                               )
                         : null,

@@ -40,7 +40,8 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
     _customStart = DateTime(t.year, t.month, t.day - 13);
   }
 
-  DateTime get _today => InsightsCalculator.dayOf(ref.read(clockProvider).now());
+  DateTime get _today =>
+      InsightsCalculator.dayOf(ref.read(clockProvider).now());
 
   bool get _isToday => _selected == _today;
 
@@ -150,9 +151,7 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                           ),
                           Text(
                             dateLabel,
-                            style: text.bodySmall?.copyWith(
-                              color: c.inkMuted,
-                            ),
+                            style: text.bodySmall?.copyWith(color: c.inkMuted),
                           ),
                         ],
                       ),
@@ -297,7 +296,8 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                     _StatCard(
                       label: context.tx('Sessions เฉลี่ย', 'Avg. sessions'),
                       value: data.sessionsPerDay.toStringAsFixed(
-                        data.sessionsPerDay == data.sessionsPerDay.roundToDouble()
+                        data.sessionsPerDay ==
+                                data.sessionsPerDay.roundToDouble()
                             ? 0
                             : 1,
                       ),
@@ -409,9 +409,9 @@ class _EmptyCard extends StatelessWidget {
     return SoftCard(
       child: Text(
         message,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: c.inkMuted,
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.bodyMedium?.copyWith(color: c.inkMuted),
       ),
     );
   }
@@ -583,7 +583,10 @@ class _AppUsageRow extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  context.tx('${usage.blocks} บล็อก', '${usage.blocks} blocked'),
+                  context.tx(
+                    '${usage.blocks} บล็อก',
+                    '${usage.blocks} blocked',
+                  ),
                   style: text.labelMedium?.copyWith(
                     color: c.success,
                     fontWeight: FontWeight.w800,
@@ -798,10 +801,7 @@ class _TimelineRow extends StatelessWidget {
       TimelineKind.attemptNotified => (
         Icons.warning_amber_rounded,
         c.warn,
-        context.tx(
-          'เปิด $app • แจ้งเตือนแล้ว',
-          'Opened $app • warned',
-        ),
+        context.tx('เปิด $app • แจ้งเตือนแล้ว', 'Opened $app • warned'),
       ),
       TimelineKind.attemptOpened => (
         Icons.warning_amber_rounded,

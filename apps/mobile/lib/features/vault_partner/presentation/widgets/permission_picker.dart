@@ -103,7 +103,10 @@ class PermissionPicker extends StatelessWidget {
                                 shape: BoxShape.circle,
                                 border: on
                                     ? null
-                                    : Border.all(color: c.borderStrong, width: 2),
+                                    : Border.all(
+                                        color: c.borderStrong,
+                                        width: 2,
+                                      ),
                               ),
                               child: on
                                   ? Icon(

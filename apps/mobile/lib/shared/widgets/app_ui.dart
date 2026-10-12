@@ -1,4 +1,3 @@
-import 'package:characters/characters.dart';
 import 'package:flutter/material.dart';
 import 'package:homeo/core/theme/app_colors.dart';
 
@@ -507,9 +506,7 @@ class PillChoice extends StatelessWidget {
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(999),
-                border: selected
-                    ? null
-                    : Border.all(color: c.border, width: 2),
+                border: selected ? null : Border.all(color: c.border, width: 2),
               ),
               child: Text(
                 label,

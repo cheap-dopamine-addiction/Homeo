@@ -13,9 +13,11 @@ class InsightsRange {
   final DateTime end;
 
   int get days =>
-      DateTime.utc(end.year, end.month, end.day)
-          .difference(DateTime.utc(start.year, start.month, start.day))
-          .inDays +
+      DateTime.utc(
+        end.year,
+        end.month,
+        end.day,
+      ).difference(DateTime.utc(start.year, start.month, start.day)).inDays +
       1;
 
   DateTime get endExclusive => DateTime(end.year, end.month, end.day + 1);
@@ -78,7 +80,12 @@ enum SmartInsightKind { bestHour, topApp, frictionBlocks }
 
 @immutable
 class SmartInsight {
-  const SmartInsight(this.kind, {this.hour = 0, this.packageId = '', this.count = 0});
+  const SmartInsight(
+    this.kind, {
+    this.hour = 0,
+    this.packageId = '',
+    this.count = 0,
+  });
 
   final SmartInsightKind kind;
   final int hour;
@@ -172,9 +179,10 @@ abstract final class InsightsCalculator {
     );
 
     final weighted = evs.fold<double>(0, (sum, e) => sum + _weight(e.action));
-    final dli = (weighted / range.days / _dliCeilingPerDay * 100)
-        .round()
-        .clamp(0, 100);
+    final dli = (weighted / range.days / _dliCeilingPerDay * 100).round().clamp(
+      0,
+      100,
+    );
 
     return InsightsData(
       range: range,

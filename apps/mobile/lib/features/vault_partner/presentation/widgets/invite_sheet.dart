@@ -79,7 +79,9 @@ class _InviteSheetState extends State<_InviteSheet> {
           ),
         ),
         const SizedBox(height: 16),
-        SectionLabel(context.tx('เลือกสิ่งที่ต้องการแชร์', 'Choose what to share')),
+        SectionLabel(
+          context.tx('เลือกสิ่งที่ต้องการแชร์', 'Choose what to share'),
+        ),
         const SizedBox(height: 8),
         PermissionPicker(selected: _perms, onToggle: _toggle),
         Text(

@@ -248,9 +248,7 @@ class _WelcomeStep extends ConsumerWidget {
                               'Homeo helps you focus more easily — without judging or forcing you.',
                             ),
                             textAlign: TextAlign.center,
-                            style: text.bodyLarge?.copyWith(
-                              color: c.inkMuted,
-                            ),
+                            style: text.bodyLarge?.copyWith(color: c.inkMuted),
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -260,9 +258,7 @@ class _WelcomeStep extends ConsumerWidget {
                             'You stay in control of everything.',
                           ),
                           textAlign: TextAlign.center,
-                          style: text.bodyMedium?.copyWith(
-                            color: c.inkSubtle,
-                          ),
+                          style: text.bodyMedium?.copyWith(color: c.inkSubtle),
                         ),
                       ],
                     ),
@@ -370,9 +366,19 @@ class _TriggersStep extends ConsumerWidget {
 // ── 2 · goal ───────────────────────────────────────────────────────────────
 
 const _goals = <(String, String, String, IconData)>[
-  ('read', 'อ่านหนังสือได้นานขึ้น', 'Read for longer', Icons.menu_book_outlined),
+  (
+    'read',
+    'อ่านหนังสือได้นานขึ้น',
+    'Read for longer',
+    Icons.menu_book_outlined,
+  ),
   ('work', 'ทำงานแบบมีสมาธิ', 'Work with focus', Icons.work_outline_rounded),
-  ('social', 'ลดเวลาบนโซเชียล', 'Spend less time on social', Icons.smartphone_rounded),
+  (
+    'social',
+    'ลดเวลาบนโซเชียล',
+    'Spend less time on social',
+    Icons.smartphone_rounded,
+  ),
   ('create', 'งานสร้างสรรค์', 'Creative work', Icons.palette_outlined),
   ('other', 'อื่น ๆ', 'Something else', Icons.star_outline_rounded),
 ];
@@ -503,7 +509,10 @@ class _AppsStepState extends ConsumerState<_AppsStep> {
       children: [
         const _TopBar(dot: 2),
         _Heading(
-          context.tx('แอปไหนที่ดึงความสนใจ?', 'Which apps pull your attention?'),
+          context.tx(
+            'แอปไหนที่ดึงความสนใจ?',
+            'Which apps pull your attention?',
+          ),
           context.tx(
             'Homeo จะช่วยเพิ่ม friction ก่อนเปิดแอปที่กำหนด',
             'Homeo adds friction before you open the apps you choose',
@@ -615,11 +624,41 @@ class _AppsStepState extends ConsumerState<_AppsStep> {
 // ── 4 · friction level ─────────────────────────────────────────────────────
 
 const _frictionOptions = <(String, String, String, String, String)>[
-  ('L0', 'เบาๆ', 'Gentle', 'แค่ช่วยเตือนเมื่อคุณเริ่มหลุดโฟกัส', 'Just a nudge when you start to drift'),
-  ('L1', 'ช่วยหยุดสักครู่', 'A short pause', 'ให้เวลาคุณคิดก่อนเปิด', 'A moment to think before opening'),
-  ('L2', 'ช่วยให้หยุดคิด', 'Stop and think', 'เพิ่มช่วงสะท้อนก่อนเปิด', 'A reflective step before opening'),
-  ('L3', 'ปกป้องจริงจัง', 'Serious protection', 'บล็อกในช่วง Focus', 'Blocked during focus sessions'),
-  ('L4', 'ปกป้องร่วมกับ Partner', 'Protected with a partner', 'ต้องมีขั้นตอนเพิ่มเติมในการปลดบล็อก', 'Extra steps needed to unblock'),
+  (
+    'L0',
+    'เบาๆ',
+    'Gentle',
+    'แค่ช่วยเตือนเมื่อคุณเริ่มหลุดโฟกัส',
+    'Just a nudge when you start to drift',
+  ),
+  (
+    'L1',
+    'ช่วยหยุดสักครู่',
+    'A short pause',
+    'ให้เวลาคุณคิดก่อนเปิด',
+    'A moment to think before opening',
+  ),
+  (
+    'L2',
+    'ช่วยให้หยุดคิด',
+    'Stop and think',
+    'เพิ่มช่วงสะท้อนก่อนเปิด',
+    'A reflective step before opening',
+  ),
+  (
+    'L3',
+    'ปกป้องจริงจัง',
+    'Serious protection',
+    'บล็อกในช่วง Focus',
+    'Blocked during focus sessions',
+  ),
+  (
+    'L4',
+    'ปกป้องร่วมกับ Partner',
+    'Protected with a partner',
+    'ต้องมีขั้นตอนเพิ่มเติมในการปลดบล็อก',
+    'Extra steps needed to unblock',
+  ),
 ];
 
 class _FrictionStep extends ConsumerWidget {
@@ -722,10 +761,7 @@ class _FrictionStep extends ConsumerWidget {
             },
           ),
         ),
-        _NextButton(
-          label: context.tx('ต่อไป', 'Next'),
-          onPressed: ctrl.next,
-        ),
+        _NextButton(label: context.tx('ต่อไป', 'Next'), onPressed: ctrl.next),
       ],
     );
   }
@@ -777,7 +813,10 @@ class _PermissionsStep extends ConsumerWidget {
       children: [
         const _TopBar(dot: 4, showSkip: false),
         _Heading(
-          context.tx('Homeo ต้องการ\nสิทธิ์อะไรบ้าง?', 'What permissions\ndoes Homeo need?'),
+          context.tx(
+            'Homeo ต้องการ\nสิทธิ์อะไรบ้าง?',
+            'What permissions\ndoes Homeo need?',
+          ),
           context.tx(
             'เราโปร่งใสเสมอ — คุณควบคุมได้ทุกอย่าง',
             "We're always transparent — you stay in control",
@@ -794,12 +833,7 @@ class _PermissionsStep extends ConsumerWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      IconTile(
-                        icon: p.$1,
-                        size: 48,
-                        iconSize: 24,
-                        radius: 14,
-                      ),
+                      IconTile(icon: p.$1, size: 48, iconSize: 24, radius: 14),
                       const SizedBox(width: 14),
                       Expanded(
                         child: Column(

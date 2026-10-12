@@ -78,7 +78,9 @@ class CoachState {
     return CoachState(
       messages: messages ?? this.messages,
       isTyping: isTyping ?? this.isTyping,
-      activeId: identical(activeId, _keep) ? this.activeId : activeId as String?,
+      activeId: identical(activeId, _keep)
+          ? this.activeId
+          : activeId as String?,
       editingId: identical(editingId, _keep)
           ? this.editingId
           : editingId as String?,
@@ -112,7 +114,8 @@ class AiCoachController extends Notifier<CoachState> {
     return const CoachState();
   }
 
-  String _nextId() => '${DateTime.now().microsecondsSinceEpoch}_${_idCounter++}';
+  String _nextId() =>
+      '${DateTime.now().microsecondsSinceEpoch}_${_idCounter++}';
 
   /// Adds the opening greeting once (first time the tab is shown).
   void ensureGreeting(String text) {

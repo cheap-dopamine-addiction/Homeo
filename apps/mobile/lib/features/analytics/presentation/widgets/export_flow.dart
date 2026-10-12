@@ -70,10 +70,8 @@ class _ExportFlowState extends ConsumerState<ExportFlow> {
     final sessions =
         ref.read(finishedSessionsProvider).value ?? const <FocusSession>[];
     final events =
-        ref.read(distractionEventsProvider).value ??
-        const <DistractionEvent>[];
-    final blocked =
-        ref.read(blockedAppsProvider).value ?? const <BlockedApp>[];
+        ref.read(distractionEventsProvider).value ?? const <DistractionEvent>[];
+    final blocked = ref.read(blockedAppsProvider).value ?? const <BlockedApp>[];
     final settings =
         ref.read(userSettingsProvider).value ?? UserSettings.defaults;
     final partners = [
@@ -185,10 +183,30 @@ class _ExportFlowState extends ConsumerState<ExportFlow> {
 
     final formats = <(ExportFormat, String, String, String)>[
       (ExportFormat.pdf, 'PDF', 'สรุปพร้อมกราฟ', 'Summary with charts'),
-      (ExportFormat.csv, 'CSV', 'ข้อมูลดิบสำหรับ spreadsheet', 'Raw data for spreadsheets'),
-      (ExportFormat.json, 'JSON', 'settings, แอปบล็อก, partner', 'Settings, blocked apps, partners'),
-      (ExportFormat.markdown, 'Markdown', 'สรุปรายวัน + insights', 'Daily summary + insights'),
-      (ExportFormat.png, 'PNG', 'กราฟการใช้งานและ focus trend', 'Usage charts and focus trend'),
+      (
+        ExportFormat.csv,
+        'CSV',
+        'ข้อมูลดิบสำหรับ spreadsheet',
+        'Raw data for spreadsheets',
+      ),
+      (
+        ExportFormat.json,
+        'JSON',
+        'settings, แอปบล็อก, partner',
+        'Settings, blocked apps, partners',
+      ),
+      (
+        ExportFormat.markdown,
+        'Markdown',
+        'สรุปรายวัน + insights',
+        'Daily summary + insights',
+      ),
+      (
+        ExportFormat.png,
+        'PNG',
+        'กราฟการใช้งานและ focus trend',
+        'Usage charts and focus trend',
+      ),
     ];
     final ranges = <(ExportRange, String, String)>[
       (ExportRange.days7, '7 วันล่าสุด', 'Last 7 days'),
@@ -236,7 +254,9 @@ class _ExportFlowState extends ConsumerState<ExportFlow> {
                         IconTile(
                           icon: Icons.description_outlined,
                           size: 36,
-                          background: _format == f.$1 ? c.surface : c.surfaceAlt,
+                          background: _format == f.$1
+                              ? c.surface
+                              : c.surfaceAlt,
                           color: _format == f.$1 ? c.primary : c.inkMuted,
                         ),
                         const SizedBox(width: 12),
@@ -253,10 +273,7 @@ class _ExportFlowState extends ConsumerState<ExportFlow> {
                               Text(
                                 f.$1.supported
                                     ? context.tx(f.$3, f.$4)
-                                    : context.tx(
-                                        'เร็ว ๆ นี้',
-                                        'Coming soon',
-                                      ),
+                                    : context.tx('เร็ว ๆ นี้', 'Coming soon'),
                                 style: text.bodySmall?.copyWith(
                                   color: c.inkMuted,
                                 ),
@@ -346,7 +363,8 @@ class _ExportFlowState extends ConsumerState<ExportFlow> {
         ),
         const SizedBox(height: 12),
         GradientButton(
-          label: '${context.tx('ส่งออก', 'Export')} ${_format.name.toUpperCase()}',
+          label:
+              '${context.tx('ส่งออก', 'Export')} ${_format.name.toUpperCase()}',
           onPressed: _format.supported ? _start : null,
         ),
       ],

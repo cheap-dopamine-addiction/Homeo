@@ -118,7 +118,8 @@ class AppPreferences {
   factory AppPreferences.fromJson(Map<String, Object?> json) {
     const d = AppPreferences();
     bool b(String k, bool def) => json[k] is bool ? json[k]! as bool : def;
-    String s(String k, String def) => json[k] is String ? json[k]! as String : def;
+    String s(String k, String def) =>
+        json[k] is String ? json[k]! as String : def;
     final triggers = json['onboardingTriggers'];
     final theme = s('themeMode', d.themeMode);
     return AppPreferences(

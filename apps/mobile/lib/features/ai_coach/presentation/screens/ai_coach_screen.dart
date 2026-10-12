@@ -90,7 +90,9 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
   Future<void> _copy(String text, {bool popActive = true}) async {
     final msg = context.tx('คัดลอกแล้ว', 'Copied');
     await Clipboard.setData(ClipboardData(text: text));
-    ref.read(aiCoachControllerProvider.notifier).clearActive();
+    if (popActive) {
+      ref.read(aiCoachControllerProvider.notifier).clearActive();
+    }
     if (mounted) showToast(context, msg);
   }
 
@@ -224,7 +226,8 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
                                 onCopy: () => _copy(m.text),
                                 onShare: () => _copy(m.text),
                                 onEditCancel: ctrl.cancelEdit,
-                                onEditSend: (t) => ctrl.sendEdit(m.id, t, _reply),
+                                onEditSend: (t) =>
+                                    ctrl.sendEdit(m.id, t, _reply),
                               ),
                             if (state.isTyping) const _TypingRow(),
                           ],
@@ -281,7 +284,10 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(999),
-                              borderSide: BorderSide(color: c.primary, width: 2),
+                              borderSide: BorderSide(
+                                color: c.primary,
+                                width: 2,
+                              ),
                             ),
                             fillColor: c.surfaceAlt,
                           ),
@@ -290,8 +296,7 @@ class _AiCoachScreenState extends ConsumerState<AiCoachScreen> {
                       const SizedBox(width: 8),
                       IconButton.filled(
                         tooltip: context.tx('ส่ง', 'Send'),
-                        onPressed:
-                            _input.text.trim().isEmpty || state.isTyping
+                        onPressed: _input.text.trim().isEmpty || state.isTyping
                             ? null
                             : () => _send(_input.text),
                         style: IconButton.styleFrom(
@@ -786,7 +791,10 @@ class _BubbleState extends State<_Bubble> {
                 : MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              if (isAi) ...[const _AvatarBot(size: 36), const SizedBox(width: 8)],
+              if (isAi) ...[
+                const _AvatarBot(size: 36),
+                const SizedBox(width: 8),
+              ],
               Flexible(
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
@@ -876,7 +884,10 @@ class _EmptyState extends StatelessWidget {
           style: text.titleMedium?.copyWith(fontWeight: FontWeight.w800),
         ),
         Text(
-          context.tx('เริ่มคุยกับ AI Coach ได้เลย', 'Start chatting with AI Coach'),
+          context.tx(
+            'เริ่มคุยกับ AI Coach ได้เลย',
+            'Start chatting with AI Coach',
+          ),
           textAlign: TextAlign.center,
           style: text.bodyMedium?.copyWith(color: c.inkMuted),
         ),
@@ -931,7 +942,9 @@ class _Sidebar extends StatelessWidget {
                     height: 32,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(colors: [c.primary, c.primaryGlow]),
+                      gradient: LinearGradient(
+                        colors: [c.primary, c.primaryGlow],
+                      ),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
