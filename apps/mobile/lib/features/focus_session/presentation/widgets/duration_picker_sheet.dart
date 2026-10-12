@@ -5,8 +5,9 @@ import 'package:homeo/core/theme/app_dimens.dart';
 import 'package:homeo/features/focus_session/domain/focus_rules.dart';
 import 'package:homeo/l10n/l10n.dart';
 
-/// Wheel picker (hours + minutes) for a custom session length.
-/// Returns null when cancelled.
+/// Wheel picker (hours + minutes + seconds, as in the design's
+/// `DurationPicker`) for a custom session length. Returns null when
+/// cancelled. Anything under [FocusRules.minDuration] cannot be confirmed.
 Future<Duration?> showDurationPickerSheet(
   BuildContext context, {
   required Duration initial,
@@ -29,7 +30,7 @@ class _DurationPickerSheet extends StatefulWidget {
 }
 
 class _DurationPickerSheetState extends State<_DurationPickerSheet> {
-  late Duration _value = Duration(minutes: widget.initial.inMinutes);
+  late Duration _value = Duration(seconds: widget.initial.inSeconds);
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +58,7 @@ class _DurationPickerSheetState extends State<_DurationPickerSheet> {
             SizedBox(
               height: 200,
               child: CupertinoTimerPicker(
-                mode: CupertinoTimerPickerMode.hm,
+                mode: CupertinoTimerPickerMode.hms,
                 initialTimerDuration: _value,
                 onTimerDurationChanged: (d) => setState(() => _value = d),
               ),

@@ -1,4 +1,5 @@
 abstract final class AppRoutes {
+  static const String onboarding = '/onboarding';
   static const String focus = '/focus';
   static const String vault = '/vault';
   static const String insights = '/insights';

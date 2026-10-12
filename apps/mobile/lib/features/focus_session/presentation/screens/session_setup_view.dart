@@ -1,17 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:homeo/app/router/app_routes.dart';
 import 'package:homeo/core/theme/app_colors.dart';
 import 'package:homeo/core/theme/app_dimens.dart';
 import 'package:homeo/core/utils/duration_format.dart';
+import 'package:homeo/core/utils/localized_text.dart';
 import 'package:homeo/features/focus_session/domain/focus_rules.dart';
 import 'package:homeo/features/focus_session/presentation/providers/focus_session_controller.dart';
 import 'package:homeo/features/focus_session/presentation/widgets/duration_picker_sheet.dart';
+import 'package:homeo/features/friction/presentation/friction_level_l10n.dart';
+import 'package:homeo/features/settings/data/settings_repository.dart';
+import 'package:homeo/features/settings/domain/user_settings.dart';
 import 'package:homeo/l10n/l10n.dart';
 import 'package:homeo/shared/widgets/choice_pill.dart';
 
 /// Focus tab, setup phase: pick a duration, optionally write an intention
-/// (an implementation intention — PRD §3.2 / §9.1).
+/// (an implementation intention — PRD §3.2 / §9.1), see the active friction
+/// level (design: "Friction Level … แก้ไข").
 class SessionSetupView extends ConsumerStatefulWidget {
   const SessionSetupView({super.key});
 
@@ -59,6 +66,8 @@ class _SessionSetupViewState extends ConsumerState<SessionSetupView> {
     final colors = AppColors.of(context);
     final text = Theme.of(context).textTheme;
     final controller = ref.read(focusSessionControllerProvider.notifier);
+    final settings =
+        ref.watch(userSettingsProvider).value ?? UserSettings.defaults;
 
     return PopScope(
       canPop: false, // Android back closes setup instead of exiting the app
@@ -142,6 +151,47 @@ class _SessionSetupViewState extends ConsumerState<SessionSetupView> {
                     Text(
                       l10n.setupIntentionHelper,
                       style: text.bodySmall?.copyWith(color: colors.inkMuted),
+                    ),
+                    const SizedBox(height: AppSpacing.xl),
+                    Container(
+                      padding: const EdgeInsets.all(AppSpacing.lg),
+                      decoration: BoxDecoration(
+                        color: colors.primarySoft,
+                        borderRadius: AppRadius.cardRadius,
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.shield_outlined,
+                            color: colors.onPrimarySoft,
+                          ),
+                          const SizedBox(width: AppSpacing.md),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Friction Level',
+                                  style: text.labelSmall?.copyWith(
+                                    color: colors.inkMuted,
+                                  ),
+                                ),
+                                Text(
+                                  settings.defaultFrictionLevel.label(l10n),
+                                  style: text.titleSmall?.copyWith(
+                                    color: colors.onPrimarySoft,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () =>
+                                context.push(AppRoutes.frictionSettings),
+                            child: Text(context.tx('แก้ไข', 'Edit')),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),

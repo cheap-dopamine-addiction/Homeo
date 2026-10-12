@@ -7,6 +7,8 @@ import 'package:homeo/features/analytics/presentation/screens/insights_screen.da
 import 'package:homeo/features/focus_session/presentation/screens/focus_screen.dart';
 import 'package:homeo/features/friction/presentation/screens/detection_setup_screen.dart';
 import 'package:homeo/features/friction/presentation/screens/friction_settings_screen.dart';
+import 'package:homeo/features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'package:homeo/features/settings/presentation/providers/preferences_controller.dart';
 import 'package:homeo/features/settings/presentation/screens/settings_screen.dart';
 import 'package:homeo/features/vault_partner/presentation/screens/vault_screen.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -18,12 +20,35 @@ part 'app_router.g.dart';
 /// `ShellRoute` rebuilds the tab from scratch every time).
 ///
 /// Branch order must match the destination order in [AppShell].
+///
+/// First launch is redirected to the onboarding flow until
+/// `AppPreferences.onboardingDone` is set; the redirect is re-evaluated
+/// whenever that flag changes.
 @Riverpod(keepAlive: true)
 GoRouter appRouter(Ref ref) {
+  final refresh = ValueNotifier<int>(0);
+  ref.listen(
+    preferencesProvider.select((p) => (p.loaded, p.onboardingDone)),
+    (previous, next) => refresh.value++,
+  );
+
   final router = GoRouter(
     initialLocation: AppRoutes.focus,
     debugLogDiagnostics: kDebugMode,
+    refreshListenable: refresh,
+    redirect: (context, state) {
+      final prefs = ref.read(preferencesProvider);
+      if (!prefs.loaded) return null;
+      final atOnboarding = state.matchedLocation == AppRoutes.onboarding;
+      if (!prefs.onboardingDone && !atOnboarding) return AppRoutes.onboarding;
+      if (prefs.onboardingDone && atOnboarding) return AppRoutes.focus;
+      return null;
+    },
     routes: [
+      GoRoute(
+        path: AppRoutes.onboarding,
+        builder: (context, state) => const OnboardingScreen(),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
             AppShell(navigationShell: navigationShell),
@@ -82,6 +107,9 @@ GoRouter appRouter(Ref ref) {
       ),
     ],
   );
-  ref.onDispose(router.dispose);
+  ref.onDispose(() {
+    router.dispose();
+    refresh.dispose();
+  });
   return router;
 }

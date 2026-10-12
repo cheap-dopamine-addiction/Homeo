@@ -8,17 +8,25 @@ import 'package:homeo/core/notifications/notification_service.dart';
 import 'package:homeo/core/theme/app_theme.dart';
 import 'package:homeo/features/friction/data/deep_link_service.dart';
 import 'package:homeo/features/friction/data/detected_app_ingest.dart';
+import 'package:homeo/features/settings/presentation/providers/preferences_controller.dart';
 
 /// One-time start-up work.
 ///
 /// Only the local database is *fatal*: nothing works without it. Everything
-/// else (notifications, deep links, importing native events) is best effort
-/// and must never keep the user on a blank screen.
+/// else (preferences, notifications, deep links, importing native events) is
+/// best effort and must never keep the user on a blank screen.
 ///
 /// `retry` is disabled on purpose: Riverpod 3 retries a failing provider with
 /// exponential back-off, which would keep the UI on the loading spinner for
 /// minutes instead of showing the error.
 final bootProvider = FutureProvider<void>((ref) async {
+  // Preferences first: theme mode + the onboarding flag decide the very first
+  // frame, and this step cannot fail (it falls back to defaults).
+  await _soft(
+    'preferences',
+    () => ref.read(preferencesProvider.notifier).load(),
+  );
+
   final db = ref.read(appDatabaseProvider);
   await db.customSelect('SELECT 1').get().timeout(const Duration(seconds: 10));
 

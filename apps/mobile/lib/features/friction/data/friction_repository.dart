@@ -28,6 +28,10 @@ abstract interface class FrictionRepository {
   /// Logged events for [appPackageId] at or after [since].
   Future<int> countAttemptsSince(String appPackageId, DateTime since);
 
+  /// Every logged event, newest first. Feeds Insights and data export. The
+  /// encrypted `reason_text` is intentionally *not* decrypted here.
+  Stream<List<DistractionEvent>> watchEvents();
+
   Future<void> recordEmergency(EmergencyOverride override);
   Future<EmergencyOverride?> latestEmergency();
 
@@ -122,6 +126,13 @@ class DriftFrictionRepository implements FrictionRepository {
     return row.read(count) ?? 0;
   }
 
+  @override
+  Stream<List<DistractionEvent>> watchEvents() {
+    final query = _db.select(_db.distractionEvents)
+      ..orderBy([(r) => OrderingTerm.desc(r.occurredAt)]);
+    return query.watch().map((rows) => rows.map(_toEvent).toList());
+  }
+
   // ── Emergency ────────────────────────────────────────────────────────────
 
   @override
@@ -178,6 +189,22 @@ class DriftFrictionRepository implements FrictionRepository {
     appPackageId: row.appPackageId,
     level: FrictionLevel.fromCode(row.frictionLevel),
   );
+
+  DistractionEvent _toEvent(DistractionEventRow row) {
+    // Unknown names (written by a newer build) degrade to `notified`.
+    final action = ResolvedAction.values.firstWhere(
+      (a) => a.name == row.resolvedAction,
+      orElse: () => ResolvedAction.notified,
+    );
+    return DistractionEvent(
+      id: row.id,
+      appPackageId: row.appPackageId,
+      level: FrictionLevel.fromCode(row.frictionLevel),
+      action: action,
+      occurredAt: row.occurredAt,
+      duringSession: row.duringSession,
+    );
+  }
 }
 
 @Riverpod(keepAlive: true)

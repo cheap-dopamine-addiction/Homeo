@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:homeo/app/router/app_router.dart';
 import 'package:homeo/core/theme/app_theme.dart';
 import 'package:homeo/features/friction/data/detected_app_ingest.dart';
+import 'package:homeo/features/settings/presentation/providers/preferences_controller.dart';
 import 'package:homeo/l10n/l10n.dart';
 
 class HomeoApp extends ConsumerStatefulWidget {
@@ -40,13 +41,17 @@ class _HomeoAppState extends ConsumerState<HomeoApp>
   @override
   Widget build(BuildContext context) {
     final router = ref.watch(appRouterProvider);
+    // Light / Dark / Auto from Settings → Appearance (design: ThemeContext).
+    final themeMode = ref.watch(
+      preferencesProvider.select((p) => p.flutterThemeMode),
+    );
 
     return MaterialApp.router(
       onGenerateTitle: (context) => context.l10n.appName,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.system, // user override arrives with Settings
+      themeMode: themeMode,
       routerConfig: router,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,

@@ -1,17 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:homeo/app/router/app_routes.dart';
 import 'package:homeo/core/theme/app_colors.dart';
 import 'package:homeo/core/theme/app_dimens.dart';
 import 'package:homeo/core/time/clock.dart';
 import 'package:homeo/core/utils/duration_format.dart';
+import 'package:homeo/core/utils/localized_text.dart';
+import 'package:homeo/features/analytics/domain/insights_calculator.dart';
+import 'package:homeo/features/analytics/presentation/providers/insights_providers.dart';
 import 'package:homeo/features/focus_session/domain/focus_session.dart';
 import 'package:homeo/features/focus_session/presentation/providers/focus_session_controller.dart';
 import 'package:homeo/features/focus_session/presentation/providers/focus_session_providers.dart';
 import 'package:homeo/features/focus_session/presentation/widgets/streak_card.dart';
+import 'package:homeo/features/friction/domain/app_catalog.dart';
 import 'package:homeo/l10n/l10n.dart';
 import 'package:intl/intl.dart';
 
-/// Focus tab, idle phase: greeting, streak, "start" card, today's numbers.
+/// Focus tab, idle phase: greeting, streak, "start" card, today's numbers,
+/// a data-driven tip (design: "ข้อมูลน่ารู้") and the last session.
 class FocusHomeView extends ConsumerWidget {
   const FocusHomeView({super.key});
 
@@ -23,6 +30,7 @@ class FocusHomeView extends ConsumerWidget {
     final stats = ref.watch(focusStatsProvider);
     final now = ref.watch(clockProvider).now();
     final locale = Localizations.localeOf(context).toString();
+    final insights = ref.watch(weeklySmartInsightsProvider);
 
     final greeting = now.hour < 12
         ? l10n.greetingMorning
@@ -77,6 +85,10 @@ class FocusHomeView extends ConsumerWidget {
               ),
             ],
           ),
+          if (insights.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.lg),
+            _TipCard(insight: insights.first),
+          ],
           if (stats.lastSession != null) ...[
             const SizedBox(height: AppSpacing.lg),
             _LastSessionCard(session: stats.lastSession!),
@@ -101,7 +113,11 @@ class _StartCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
-        color: colors.primary,
+        gradient: LinearGradient(
+          colors: [colors.primary, colors.primaryGlow],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: AppRadius.cardRadius,
       ),
       child: Column(
@@ -110,6 +126,34 @@ class _StartCard extends StatelessWidget {
           Text(
             l10n.focusPrompt,
             style: text.titleMedium?.copyWith(color: colors.onPrimary),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          // Design shows an intention box; tapping opens setup where it is
+          // actually typed (the field lives in the setup phase).
+          Semantics(
+            button: true,
+            label: l10n.setupIntentionHint,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(AppRadius.button),
+              onTap: onStart,
+              child: Container(
+                constraints: const BoxConstraints(minHeight: 48),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg,
+                  vertical: AppSpacing.md,
+                ),
+                decoration: BoxDecoration(
+                  color: colors.onPrimary.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(AppRadius.button),
+                ),
+                child: Text(
+                  l10n.setupIntentionHint,
+                  style: text.bodyMedium?.copyWith(
+                    color: colors.onPrimary.withValues(alpha: 0.85),
+                  ),
+                ),
+              ),
+            ),
           ),
           const SizedBox(height: AppSpacing.lg),
           // Inverted button: readable on the primary card in both themes.
@@ -161,6 +205,63 @@ class _StatTile extends StatelessWidget {
             label,
             textAlign: TextAlign.center,
             style: text.bodySmall?.copyWith(color: colors.inkMuted),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// "ข้อมูลน่ารู้" card: the first smart insight from the last 7 days, with a
+/// shortcut to Insights. Only shown when there is real data.
+class _TipCard extends StatelessWidget {
+  const _TipCard({required this.insight});
+
+  final SmartInsight insight;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final text = Theme.of(context).textTheme;
+    String hh(int h) => h.toString().padLeft(2, '0');
+    final app = AppCatalog.nameOf(insight.packageId);
+
+    final body = switch (insight.kind) {
+      SmartInsightKind.bestHour => context.tx(
+        'โฟกัสดีที่สุดช่วง ${hh(insight.hour)}:00–${hh((insight.hour + 2) % 24)}:00',
+        'Best focus around ${hh(insight.hour)}:00–${hh((insight.hour + 2) % 24)}:00',
+      ),
+      SmartInsightKind.topApp => context.tx(
+        '$app กระตุ้นคุณ ${insight.count} ครั้งใน 7 วันที่ผ่านมา',
+        '$app tempted you ${insight.count} times in the last 7 days',
+      ),
+      SmartInsightKind.frictionBlocks => context.tx(
+        'Friction ช่วยให้กลับไปโฟกัส ${insight.count} ครั้งใน 7 วัน',
+        'Friction brought you back to focus ${insight.count} times in 7 days',
+      ),
+    };
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: colors.primarySoft,
+        borderRadius: AppRadius.cardRadius,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.tx('ข้อมูลน่ารู้', 'Did you know'),
+            style: text.labelMedium?.copyWith(color: colors.onPrimarySoft),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(body, style: text.bodyMedium?.copyWith(color: colors.ink)),
+          Align(
+            alignment: AlignmentDirectional.centerEnd,
+            child: TextButton(
+              onPressed: () => context.go(AppRoutes.insights),
+              child: Text(context.tx('ดูรายละเอียด', 'See details')),
+            ),
           ),
         ],
       ),
