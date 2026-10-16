@@ -117,7 +117,9 @@ class DriftFrictionRepository implements FrictionRepository {
             occurredAt: event.occurredAt,
             syncedAt: null,
           ),
-          mode: replace ? InsertMode.insertOrReplace : InsertMode.insertOrIgnore,
+          mode: replace
+              ? InsertMode.insertOrReplace
+              : InsertMode.insertOrIgnore,
         );
   }
 

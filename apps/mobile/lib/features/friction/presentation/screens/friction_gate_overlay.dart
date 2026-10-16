@@ -233,7 +233,8 @@ class _BlockScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: AppSpacing.md),
                       RemainingBuilder(
-                        until: unlockAt ?? DateTime.fromMillisecondsSinceEpoch(0),
+                        until:
+                            unlockAt ?? DateTime.fromMillisecondsSinceEpoch(0),
                         builder: (context, remaining) => OutlinedButton(
                           onPressed: remaining == Duration.zero
                               ? () => controller.proceed()
