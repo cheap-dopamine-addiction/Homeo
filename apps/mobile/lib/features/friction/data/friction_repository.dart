@@ -23,10 +23,19 @@ abstract interface class FrictionRepository {
   ///
   /// Idempotent per `event.id`: logging the same id twice keeps the first row
   /// (needed so re-importing native events after a crash cannot duplicate).
-  Future<void> logEvent(DistractionEvent event);
+  ///
+  /// With [replace] the row is overwritten instead. Used when the user's
+  /// answer at the gate resolves an open that was already logged as
+  /// `notified`: one open stays one row, and the user's answer wins.
+  Future<void> logEvent(DistractionEvent event, {bool replace = false});
 
-  /// Logged events for [appPackageId] at or after [since].
-  Future<int> countAttemptsSince(String appPackageId, DateTime since);
+  /// Logged events for [appPackageId] at or after [since], optionally
+  /// ignoring the event [excludeId] (the open that is being gated right now).
+  Future<int> countAttemptsSince(
+    String appPackageId,
+    DateTime since, {
+    String? excludeId,
+  });
 
   /// Every logged event, newest first. Feeds Insights and data export. The
   /// encrypted `reason_text` is intentionally *not* decrypted here.
@@ -93,7 +102,7 @@ class DriftFrictionRepository implements FrictionRepository {
   // ── Distraction log ──────────────────────────────────────────────────────
 
   @override
-  Future<void> logEvent(DistractionEvent event) async {
+  Future<void> logEvent(DistractionEvent event, {bool replace = false}) async {
     final reason = event.reasonText;
     await _db
         .into(_db.distractionEvents)
@@ -108,20 +117,27 @@ class DriftFrictionRepository implements FrictionRepository {
             occurredAt: event.occurredAt,
             syncedAt: null,
           ),
-          mode: InsertMode.insertOrIgnore,
+          mode: replace ? InsertMode.insertOrReplace : InsertMode.insertOrIgnore,
         );
   }
 
   @override
-  Future<int> countAttemptsSince(String appPackageId, DateTime since) async {
+  Future<int> countAttemptsSince(
+    String appPackageId,
+    DateTime since, {
+    String? excludeId,
+  }) async {
     final t = _db.distractionEvents;
     final count = t.id.count();
+    Expression<bool> predicate =
+        t.appPackageId.equals(appPackageId) &
+        t.occurredAt.isBiggerOrEqualValue(since);
+    if (excludeId != null) {
+      predicate = predicate & t.id.isNotValue(excludeId);
+    }
     final query = _db.selectOnly(t)
       ..addColumns([count])
-      ..where(
-        t.appPackageId.equals(appPackageId) &
-            t.occurredAt.isBiggerOrEqualValue(since),
-      );
+      ..where(predicate);
     final row = await query.getSingle();
     return row.read(count) ?? 0;
   }

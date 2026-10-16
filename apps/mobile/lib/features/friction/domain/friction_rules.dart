@@ -30,6 +30,10 @@ abstract final class FrictionRules {
   /// again. Product default.
   static const Duration allowWindow = Duration(minutes: 5);
 
+  /// Gentle "how long have you been here?" notification after the user chose
+  /// to carry on from a gate that came from a real detection. Product default.
+  static const Duration timeCheckDelay = Duration(minutes: 10);
+
   /// PRD §23.4: 3 per month by default, adjustable with a hard ceiling.
   static const int emergencyDefaultPerMonth = 3;
   static const int emergencyHardCeilingPerMonth = 10;

@@ -27,9 +27,24 @@
             <meta-data
                 android:name="io.flutter.embedding.android.NormalTheme"
                 android:resource="@style/NormalTheme" />
+
+            <!-- app_links (Dart) handles homeo:// itself. Without this, Flutter
+                 would also push the URI into go_router and show "page not found". -->
+            <meta-data
+                android:name="flutter_deeplinking_enabled"
+                android:value="false" />
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- Warning notification tap: homeo://intervention?app=<pkg>&ts=<ms>.
+                 Deliberately NOT BROWSABLE, so web pages cannot fire it. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="homeo" />
             </intent-filter>
         </activity>
 

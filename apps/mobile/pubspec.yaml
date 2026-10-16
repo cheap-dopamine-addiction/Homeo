@@ -1,7 +1,7 @@
 name: homeo
 description: "Homeo — reduce cheap dopamine, rebuild focus."
 publish_to: "none"
-version: 0.1.0+1
+version: 0.2.0+2
 
 environment:
   # เก็บค่า sdk เดิมที่ `flutter create` เขียนไว้ได้เลย
@@ -33,7 +33,7 @@ dependencies:
 
   # Friction / detection module
   shared_preferences: ^2.5.3 # blocked_packages lives in FlutterSharedPreferences
-  app_links: ^6.4.0 # iOS Shortcuts deep link: homeo://distraction-event?app=<id>
+  app_links: ^6.4.0 # homeo://intervention (Android) and homeo://distraction-event (iOS)
   characters: ^1.4.0 # grapheme-aware length for Thai reasons
 
   # Encryption of sensitive fields (PRD §24.3)

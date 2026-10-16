@@ -22,8 +22,10 @@ int _ceilSeconds(Duration d) => (d.inMilliseconds / 1000).ceil();
 bool gateCoversScreen(FrictionGateRequest? request) =>
     request != null && request.level != FrictionLevel.awareness;
 
-/// The friction gate (PRD §11). Sits above the whole app so it works no
-/// matter which tab is open; the app shell mounts it.
+/// The friction gate (PRD §11): a reflective pause, never a lock. Every level
+/// has a visible way out, and L0–L3 also let the user carry on after a short
+/// delay. Sits above the whole app so it works no matter which tab is open;
+/// the app shell mounts it.
 class FrictionGateOverlay extends ConsumerWidget {
   const FrictionGateOverlay({super.key});
 
@@ -154,6 +156,9 @@ class _AwarenessBannerState extends ConsumerState<_AwarenessBanner> {
 
 // ── L3 ─────────────────────────────────────────────────────────────────────
 
+/// Focus reminder (PRD §11.2 L3, v1.1): "this is your focus time". Calm and
+/// dark. "Back to focus" is the primary action; after a short pause the user
+/// may still carry on, because Homeo warns but never blocks.
 class _BlockScreen extends ConsumerWidget {
   const _BlockScreen({required this.request});
 
@@ -171,6 +176,7 @@ class _BlockScreen extends ConsumerWidget {
           final l10n = context.l10n;
           final colors = AppColors.of(context);
           final text = Theme.of(context).textTheme;
+          final unlockAt = request.unlockAt;
 
           return AnnotatedRegion<SystemUiOverlayStyle>(
             value: SystemUiOverlayStyle.light,
@@ -196,7 +202,7 @@ class _BlockScreen extends ConsumerWidget {
                                     borderRadius: BorderRadius.circular(22),
                                   ),
                                   child: Icon(
-                                    Icons.lock_outline_rounded,
+                                    Icons.self_improvement_rounded,
                                     size: 36,
                                     color: colors.primary,
                                   ),
@@ -225,6 +231,23 @@ class _BlockScreen extends ConsumerWidget {
                         onPressed: controller.returnToFocus,
                         child: Text(l10n.commonBackToFocus),
                       ),
+                      const SizedBox(height: AppSpacing.md),
+                      RemainingBuilder(
+                        until: unlockAt ?? DateTime.fromMillisecondsSinceEpoch(0),
+                        builder: (context, remaining) => OutlinedButton(
+                          onPressed: remaining == Duration.zero
+                              ? () => controller.proceed()
+                              : null,
+                          child: Text(
+                            remaining == Duration.zero
+                                ? l10n.gateOpenApp(request.appName)
+                                : l10n.gateOpenAppWait(
+                                    request.appName,
+                                    _ceilSeconds(remaining),
+                                  ),
+                          ),
+                        ),
+                      ),
                       TextButton(
                         onPressed: () => showEmergencySheet(context),
                         style: TextButton.styleFrom(
@@ -244,7 +267,8 @@ class _BlockScreen extends ConsumerWidget {
   }
 }
 
-/// Small "why am I seeing this" lines — PRD §11.4: no black-box friction.
+/// Small "why am I seeing this" lines — PRD §11.4: no black-box friction —
+/// plus the awareness fact "time N today" for this app.
 List<Widget> _notes(BuildContext context, FrictionGateRequest request) {
   final l10n = context.l10n;
   final colors = AppColors.of(context);
@@ -253,6 +277,7 @@ List<Widget> _notes(BuildContext context, FrictionGateRequest request) {
   ).textTheme.bodySmall?.copyWith(color: colors.inkMuted);
 
   final lines = <String>[
+    l10n.gateAwarenessTitle(request.appName, request.attemptNumberToday),
     if (request.duringSession) l10n.gateSessionNote,
     if (request.escalatedByBurst) l10n.gateEscalatedNote,
   ];

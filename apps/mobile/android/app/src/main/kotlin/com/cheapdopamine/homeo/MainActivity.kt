@@ -87,6 +87,13 @@ class MainActivity : FlutterActivity() {
                             result.success(null)
                         }
 
+                        "moveToBack" -> {
+                            // The user chose to carry on after the pause: send Homeo
+                            // behind, which reveals the app they were already in.
+                            moveTaskToBack(true)
+                            result.success(null)
+                        }
+
                         else -> result.notImplemented()
                     }
                 } catch (e: Exception) {

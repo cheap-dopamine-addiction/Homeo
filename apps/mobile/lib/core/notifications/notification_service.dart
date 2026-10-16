@@ -17,7 +17,9 @@ part 'notification_service.g.dart';
 /// * app-opened warning (iOS deep link path; Android fires natively from
 ///   Kotlin so it also works with the Flutter engine dead),
 /// * focus started / completed,
-/// * weekly summary (repeating).
+/// * weekly summary (repeating),
+/// * "time check": a gentle check-in some minutes after the user chose to
+///   carry on from a gate.
 ///
 /// Every method is best effort: a notification problem must never break a
 /// session or the gate, so failures are logged and swallowed. Notifications
@@ -28,6 +30,7 @@ class NotificationService {
   static const int _focusStartedId = 4002;
   static const int _focusCompletedId = 4003;
   static const int _weeklySummaryId = 4010;
+  static const int _timeCheckId = 4020;
   static const int _appOpenedBaseId = 5000;
 
   static const String _focusChannelId = 'focus_session_events';
@@ -142,7 +145,8 @@ class NotificationService {
     });
   }
 
-  /// "Opening TikTok: time 3 today". Used by the iOS deep-link path.
+  /// "Opening TikTok: time 3 today". Kept for callers that still want a plain
+  /// banner; the iOS Shortcuts path now shows the gate directly instead.
   Future<void> showAppOpenedWarningNotification({
     required String appName,
     required int count,
@@ -161,6 +165,46 @@ class NotificationService {
           channelDescription: l10n.notifChannelAppOpenedDesc,
         ),
       );
+    });
+  }
+
+  /// Gentle check-in at [at]: "Still on TikTok? It has been N minutes since
+  /// you chose to continue." Neutral tone, no shaming (PRD §12.4). One slot,
+  /// so a newer check-in replaces an older one.
+  ///
+  /// Strings are inline Thai/English (not ARB) so no `gen-l10n` run is needed;
+  /// move them into the ARB files when convenient.
+  Future<void> scheduleTimeCheck({
+    required String appName,
+    required DateTime at,
+    required int minutes,
+  }) async {
+    await _guard('timeCheck', () async {
+      await init();
+      final l10n = _l10n();
+      final thai = l10n.localeName == 'th';
+      await _plugin.zonedSchedule(
+        id: _timeCheckId,
+        title: thai ? 'ยังอยู่ใน $appName ไหม?' : 'Still on $appName?',
+        body: thai
+            ? 'ผ่านไป $minutes นาทีแล้วตั้งแต่คุณเลือกเปิดต่อ — นี่คือการใช้เวลาที่คุณต้องการไหม?'
+            : 'It has been $minutes minutes since you chose to continue. '
+                  'Is this how you want to spend your time?',
+        scheduledDate: tz.TZDateTime.from(at, tz.getLocation('UTC')),
+        notificationDetails: _details(
+          channelId: _appOpenedChannelId,
+          channelName: l10n.notifChannelAppOpenedName,
+          channelDescription: l10n.notifChannelAppOpenedDesc,
+        ),
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      );
+    });
+  }
+
+  Future<void> cancelTimeCheck() async {
+    await _guard('cancelTimeCheck', () async {
+      await init();
+      await _plugin.cancel(id: _timeCheckId);
     });
   }
 

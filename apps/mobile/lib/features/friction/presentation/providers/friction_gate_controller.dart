@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:homeo/core/notifications/notification_service.dart';
 import 'package:homeo/core/time/clock.dart';
 import 'package:homeo/features/focus_session/domain/focus_session_state.dart';
 import 'package:homeo/features/focus_session/presentation/providers/focus_session_controller.dart';
@@ -31,6 +32,7 @@ class FrictionGateRequest {
     required this.escalatedByBurst,
     required this.duringSession,
     required this.attemptNumberToday,
+    this.eventId,
     this.unlockAt,
     this.partner = PartnerStage.none,
     this.coolingOffEndsAt,
@@ -43,14 +45,22 @@ class FrictionGateRequest {
   final bool duringSession;
   final int attemptNumberToday;
 
-  /// "Open anyway" is refused before this instant (L1 / L2 delay). The
-  /// controller enforces it, so a UI bug cannot skip the friction.
+  /// Id of the already-logged `distraction_events` row for the real open that
+  /// led here (notification tap / Shortcuts link). Null for the debug
+  /// simulator. The user's answer replaces that row instead of adding one.
+  final String? eventId;
+
+  /// "Open anyway" is refused before this instant (delay). The controller
+  /// enforces it, so a UI bug cannot skip the pause.
   final DateTime? unlockAt;
 
   final PartnerStage partner;
   final DateTime? coolingOffEndsAt;
 
   String get appName => AppCatalog.nameOf(appPackageId);
+
+  /// True when this gate comes from a real detected open (not the simulator).
+  bool get fromDetection => eventId != null;
 
   FrictionGateRequest copyWith({
     PartnerStage? partner,
@@ -63,6 +73,7 @@ class FrictionGateRequest {
       escalatedByBurst: escalatedByBurst,
       duringSession: duringSession,
       attemptNumberToday: attemptNumberToday,
+      eventId: eventId,
       unlockAt: unlockAt,
       partner: partner ?? this.partner,
       coolingOffEndsAt: coolingOffEndsAt ?? this.coolingOffEndsAt,
@@ -70,12 +81,15 @@ class FrictionGateRequest {
   }
 }
 
-/// Decides *whether and how hard* to gate an app launch, shows the gate (via
+/// Decides *whether and how hard* to pause an app launch, shows the gate (via
 /// state), and records how it ended (PRD §9.3, §11).
 ///
-/// State is the gate on screen, or null. Attempts come from the native
-/// blocker ([BlockerBridge.attempts]) or from [onAttempt] directly (debug
-/// simulator).
+/// Homeo only warns: the gate is a reflective pause the user can always walk
+/// through ("open anyway"), after a short delay. Attempts arrive from a
+/// tapped warning notification / Shortcuts link ([onAttempt] with an
+/// `eventId`), from the native stream, or from the debug simulator.
+///
+/// State is the gate on screen, or null.
 @Riverpod(keepAlive: true)
 class FrictionGateController extends _$FrictionGateController {
   static const _uuid = Uuid();
@@ -96,14 +110,14 @@ class FrictionGateController extends _$FrictionGateController {
       _clearPartnerWait();
     });
 
-    // Keep the native blocker's watch list in step with the DB.
+    // Keep the native detector's watch list in step with the DB.
     ref.listen(blockedAppsProvider, (previous, next) {
       final apps = next.value;
       if (apps == null) return;
       _fire(_bridge.syncBlockedApps([for (final a in apps) a.appPackageId]));
     }, fireImmediately: true);
 
-    // An emergency unblock closes whatever gate is open.
+    // An emergency pause closes whatever gate is open.
     ref.listen(emergencyControllerProvider, (previous, next) {
       if (state != null && next.isActiveAt(_clock.now())) {
         _fire(_release(ResolvedAction.emergencyOverride));
@@ -115,7 +129,7 @@ class FrictionGateController extends _$FrictionGateController {
 
   // ── Entry point ──────────────────────────────────────────────────────────
 
-  Future<void> onAttempt(String appPackageId) async {
+  Future<void> onAttempt(String appPackageId, {String? eventId}) async {
     if (state != null || _resolving) return;
     _resolving = true;
     try {
@@ -133,18 +147,23 @@ class FrictionGateController extends _$FrictionGateController {
           level: blocked.level,
           duringSession: sessionRunning,
           action: ResolvedAction.emergencyOverride,
+          eventId: eventId,
         );
         _fire(_bridge.allow(appPackageId, FrictionRules.allowWindow));
         return;
       }
 
+      // The open being gated is already in the log (as `notified`); do not
+      // count it against itself.
       final priorBurst = await _repo.countAttemptsSince(
         appPackageId,
         now.subtract(FrictionRules.burstWindow),
+        excludeId: eventId,
       );
       final priorToday = await _repo.countAttemptsSince(
         appPackageId,
         DateTime(now.year, now.month, now.day),
+        excludeId: eventId,
       );
 
       final decision = FrictionPolicy.resolve(
@@ -163,9 +182,13 @@ class FrictionGateController extends _$FrictionGateController {
         escalatedByBurst: decision.escalatedByBurst,
         duringSession: decision.duringSession,
         attemptNumberToday: decision.attemptNumberToday,
+        eventId: eventId,
         unlockAt: switch (decision.level) {
           FrictionLevel.micro => now.add(FrictionRules.microDelay),
-          FrictionLevel.reflective => now.add(FrictionRules.reflectiveDelay),
+          // L3 is a focus reminder in warning-only mode: same short pause as
+          // L2 before "open anyway" appears.
+          FrictionLevel.reflective ||
+          FrictionLevel.fullBlock => now.add(FrictionRules.reflectiveDelay),
           _ => null,
         },
       );
@@ -188,16 +211,23 @@ class FrictionGateController extends _$FrictionGateController {
         level: request.level,
         duringSession: request.duringSession,
         action: ResolvedAction.returnedToFocus,
+        eventId: request.eventId,
       ),
     );
+    _fire(ref.read(notificationServiceProvider).cancelTimeCheck());
     _fire(_bridge.returnHome());
   }
 
-  /// "Open anyway" for L0–L2. Returns false — and changes nothing — if the
-  /// level does not allow it yet.
+  /// "Open anyway". Returns false — and changes nothing — if the delay has not
+  /// passed yet. Warning-only scope: L0–L3 can all be passed by the user; only
+  /// L4 (partner-gated) needs someone else.
   bool proceed({String? reason}) {
     final request = state;
-    if (request == null || !request.level.canProceedSelf) return false;
+    if (request == null) return false;
+    final canProceed =
+        request.level.canProceedSelf ||
+        request.level == FrictionLevel.fullBlock;
+    if (!canProceed) return false;
 
     final unlockAt = request.unlockAt;
     if (unlockAt != null && _clock.now().isBefore(unlockAt)) return false;
@@ -259,7 +289,11 @@ class FrictionGateController extends _$FrictionGateController {
 
   // ── Internals ────────────────────────────────────────────────────────────
 
-  /// Closes the open gate (or [request]) and lets the app through.
+  /// Closes the open gate (or [request]) and lets the user carry on.
+  ///
+  /// For a real detected open (not the simulator, not an emergency pause) it
+  /// also sends Homeo to the background so the app they chose is visible
+  /// again, and schedules a gentle "still here?" check-in.
   Future<void> _release(
     ResolvedAction action, {
     FrictionGateRequest? request,
@@ -271,12 +305,27 @@ class FrictionGateController extends _$FrictionGateController {
     state = null;
 
     _fire(_bridge.allow(open.appPackageId, FrictionRules.allowWindow));
+
+    if (open.fromDetection && action != ResolvedAction.emergencyOverride) {
+      _fire(_bridge.moveToBack());
+      _fire(
+        ref
+            .read(notificationServiceProvider)
+            .scheduleTimeCheck(
+              appName: open.appName,
+              at: _clock.now().add(FrictionRules.timeCheckDelay),
+              minutes: FrictionRules.timeCheckDelay.inMinutes,
+            ),
+      );
+    }
+
     await _log(
       appPackageId: open.appPackageId,
       level: open.level,
       duringSession: open.duringSession,
       action: action,
       reason: reason,
+      eventId: open.eventId,
     );
   }
 
@@ -286,10 +335,11 @@ class FrictionGateController extends _$FrictionGateController {
     required bool duringSession,
     required ResolvedAction action,
     String? reason,
+    String? eventId,
   }) {
     return _repo.logEvent(
       DistractionEvent(
-        id: _uuid.v4(),
+        id: eventId ?? _uuid.v4(),
         appPackageId: appPackageId,
         level: level,
         action: action,
@@ -297,6 +347,8 @@ class FrictionGateController extends _$FrictionGateController {
         duringSession: duringSession,
         reasonText: reason,
       ),
+      // The answer replaces the `notified` row of the same open.
+      replace: eventId != null,
     );
   }
 

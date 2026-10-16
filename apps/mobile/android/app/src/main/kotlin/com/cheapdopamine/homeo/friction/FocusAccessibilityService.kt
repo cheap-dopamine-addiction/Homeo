@@ -18,6 +18,8 @@ import java.util.concurrent.Executors
  *    engine dead. Events are queued in SharedPreferences and imported by Dart
  *    when the app next opens.
  *  - It only receives `packageName` (canRetrieveWindowContent=false).
+ *  - The notification it posts carries the event timestamp, so tapping it can
+ *    open the reflective gate for exactly this event (see FrictionNotifier).
  */
 class FocusAccessibilityService : AccessibilityService() {
 
@@ -70,7 +72,7 @@ class FocusAccessibilityService : AccessibilityService() {
             if (FrictionPrefs.isMuted(this, pkg, now)) return@execute
             val count = FrictionPrefs.incrementTodayCount(this, pkg)
             FrictionPrefs.appendPending(this, pkg, now)
-            FrictionNotifier.showAppOpened(this, pkg, count)
+            FrictionNotifier.showAppOpened(this, pkg, count, now)
         }
     }
 
@@ -95,7 +97,7 @@ class FocusAccessibilityService : AccessibilityService() {
     }
 
     companion object {
-        /** Same app within this window counts as one open. */
-        private const val COOLDOWN_MS = 15_000L
+        /** Same app within this window counts as one open (PRD §9.3: 30 s). */
+        private const val COOLDOWN_MS = 30_000L
     }
 }

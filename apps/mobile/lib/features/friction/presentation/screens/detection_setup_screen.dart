@@ -9,14 +9,19 @@ import 'package:homeo/app/router/app_routes.dart';
 import 'package:homeo/core/notifications/notification_service.dart';
 import 'package:homeo/core/theme/app_colors.dart';
 import 'package:homeo/core/theme/app_dimens.dart';
+import 'package:homeo/core/utils/localized_text.dart';
 import 'package:homeo/features/friction/data/blocker_bridge.dart';
 import 'package:homeo/features/friction/domain/app_catalog.dart';
+import 'package:homeo/features/friction/domain/blocked_app.dart';
+import 'package:homeo/features/friction/presentation/providers/friction_providers.dart';
 import 'package:homeo/l10n/l10n.dart';
 
 /// Setup for "app opened" warnings (warning only — nothing is ever blocked).
 ///
 /// Android: Accessibility service + notifications + battery optimisation.
-/// iOS: Shortcuts automation that opens `homeo://distraction-event?app=<id>`.
+/// Tapping the warning notification opens the reflective pause.
+/// iOS: Shortcuts automation that opens `homeo://distraction-event?app=<id>`;
+/// only watched apps are accepted, so links are listed for those only.
 /// The limits are stated plainly in the UI, not hidden.
 class DetectionSetupScreen extends ConsumerStatefulWidget {
   const DetectionSetupScreen({super.key});
@@ -84,6 +89,14 @@ class _DetectionSetupScreenState extends ConsumerState<DetectionSetupScreen>
     final colors = AppColors.of(context);
     final text = Theme.of(context).textTheme;
     final bridge = ref.read(blockerBridgeProvider);
+
+    // Links are only accepted for watched apps, so only list those.
+    final blocked =
+        ref.watch(blockedAppsProvider).value ?? const <BlockedApp>[];
+    final watchedApps = [
+      for (final app in AppCatalog.apps)
+        if (blocked.any((b) => b.appPackageId == app.packageId)) app,
+    ];
 
     return Scaffold(
       appBar: AppBar(
@@ -154,7 +167,15 @@ class _DetectionSetupScreenState extends ConsumerState<DetectionSetupScreen>
                 child: Text(step, style: text.bodyMedium),
               ),
             const SizedBox(height: AppSpacing.md),
-            for (final app in AppCatalog.apps)
+            if (watchedApps.isEmpty)
+              Text(
+                context.tx(
+                  'เลือกแอปที่ระวังก่อน แล้วลิงก์ของแอปนั้นจะแสดงที่นี่',
+                  'Pick the apps to watch first; their links will appear here.',
+                ),
+                style: text.bodySmall?.copyWith(color: colors.inkMuted),
+              ),
+            for (final app in watchedApps)
               _LinkRow(app: app, copyLabel: l10n.detectIosCopyLink),
             const SizedBox(height: AppSpacing.lg),
             _InfoCard(

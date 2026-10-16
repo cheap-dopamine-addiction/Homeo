@@ -25,7 +25,9 @@ class NativeDistractionOpen {
 ///
 /// Scope: **warning only — nothing is ever blocked or killed.** Native
 /// *detects* a watched app coming to the foreground, notifies the user, and
-/// keeps a queue of events; Dart owns policy and the local DB.
+/// keeps a queue of events; Dart owns policy and the local DB. Tapping the
+/// notification opens `homeo://intervention?app=<pkg>&ts=<ms>` (handled by
+/// `DetectedAppIngest`), which shows the reflective gate.
 ///
 /// Channel `com.cheapdopamine.homeo/friction`
 ///
@@ -41,6 +43,8 @@ class NativeDistractionOpen {
 ///    `requestIgnoreBatteryOptimizations()`
 ///    `allow({packageId, seconds})` / `allowAll({seconds})` — mute warnings.
 ///    `returnHome()` — go to the launcher (user pressed "back to focus").
+///    `moveToBack()` — send Homeo behind so the app the user chose to keep
+///        using is visible again (user pressed "open anyway").
 ///  native → Dart
 ///    `onAttempt(String packageId)` — optional; only used by the debug gate.
 ///
@@ -58,6 +62,7 @@ abstract interface class BlockerBridge {
   Future<void> allow(String packageId, Duration window);
   Future<void> allowAll(Duration window);
   Future<void> returnHome();
+  Future<void> moveToBack();
 }
 
 class MethodChannelBlockerBridge implements BlockerBridge {
@@ -144,6 +149,9 @@ class MethodChannelBlockerBridge implements BlockerBridge {
 
   @override
   Future<void> returnHome() => _invoke<void>('returnHome');
+
+  @override
+  Future<void> moveToBack() => _invoke<void>('moveToBack');
 }
 
 @Riverpod(keepAlive: true)
